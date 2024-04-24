@@ -90,8 +90,8 @@
 # readinessProbe: {}
 
 # env: {}
-
 # secret: {}
+version: latest
 networkPolicy:
   enabled: true
 core:
@@ -143,8 +143,8 @@ core:
       annotations: {}
       tls: {}
       hosts:
-        - host: datagrok.datagrok.internal
-          version: "1.18.5"
+        - host: datagrok
+          version: ""
           paths:
           - path: /
             backend:
