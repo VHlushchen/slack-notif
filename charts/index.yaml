@@ -1,9 +1,20 @@
 apiVersion: v1
 entries:
+  datagrok:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-04-24T18:51:00.644464468+03:00"
+    description: A Helm chart for Kubernetes
+    digest: 44eb400eb4b8252d570a4a76ad1c5273a89c92c63ac39c654c478ea37fb3bedd
+    name: datagrok
+    type: application
+    urls:
+    - datagrok-1.0.1.tgz
+    version: 1.0.1
   datagrok-test:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-04-24T18:44:06.832645659+03:00"
+    created: "2024-04-24T18:51:00.645164489+03:00"
     description: A Helm chart for Kubernetes
     digest: 954a6592203ede412a27e1e8c44e1e4b943a417bb8e571a69d9c0fa477561f84
     name: datagrok-test
@@ -11,4 +22,4 @@ entries:
     urls:
     - datagrok-test-1.0.1.tgz
     version: 1.0.1
-generated: "2024-04-24T18:44:06.831837105+03:00"
+generated: "2024-04-24T18:51:00.643620922+03:00"
