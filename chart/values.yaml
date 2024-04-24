@@ -1,0 +1,377 @@
+# # Default values for base chart.
+# # This is a YAML-formatted file.
+# # Declare variables to be passed into your templates.
+
+# replicaCount: 1
+# namespace: datagrok
+# image:
+#   repository: nginx
+#   pullPolicy: IfNotPresent
+#   # Overrides the image tag whose default is the chart appVersion.
+#   tag: ""
+
+# imagePullSecrets: []
+# nameOverride: ""
+# fullnameOverride: ""
+
+# containerPort: 80
+
+# serviceAccount:
+#   # Specifies whether a service account should be created
+#   create: false
+#   # Annotations to add to the service account
+#   annotations: {}
+#   # The name of the service account to use.
+#   # If not set and create is true, a name is generated using the fullname template
+#   name: ""
+# networkPolicy:
+#   enabled: true
+# podAnnotations: {}
+
+# podSecurityContext:
+#   {}
+#   # fsGroup: 2000
+
+# securityContext:
+#   {}
+#   # capabilities:
+#   #   drop:
+#   #   - ALL
+#   # readOnlyRootFilesystem: true
+#   # runAsNonRoot: true
+#   # runAsUser: 1000
+
+# service:
+#   type: ClusterIP
+#   port: 80
+#   targetPort: 8080
+
+# ingress:
+#   enabled: true
+#   annotations:
+#     alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+#     alb.ingress.kubernetes.io/actions.not-found-redirect: '{"Type": "fixed-response", "FixedResponseConfig": { "StatusCode": "404", "ContentType": "text/plain", "MessageBody": "Not found"}}'
+
+#   hosts:
+#     - host: chart-example.local
+#       paths:
+#         - path: /
+#           backend:
+#             serviceName: chart-example.local
+#             servicePort: 80
+#   tls: []
+#   #  - secretName: chart-example-tls
+#   #    hosts:
+#   #      - chart-example.local
+
+# resources:
+#   # limits:
+#   #   cpu: 100m
+#   #   memory: 128Mi
+#   requests:
+#     cpu: 100m
+#     memory: 256Mi
+
+# autoscaling:
+#   enabled: true
+#   minReplicas: 1
+#   maxReplicas: 100
+#   targetCPUUtilizationPercentage: 80
+#   # targetMemoryUtilizationPercentage: 80
+
+# nodeSelector: {}
+
+# tolerations:
+
+# affinity: {}
+
+# livenessProbe: {}
+
+# readinessProbe: {}
+
+# env: {}
+
+# secret: {}
+networkPolicy:
+  enabled: true
+core:
+  enabled: true
+  datagrok:
+    labels:
+      service: datagrok
+    cfg_pvc:
+      name: cfg
+      accessModes: ReadWriteOnce
+      storage: 1Gi 
+    data_pvc:
+      name: data
+      accessModes: ReadWriteOnce
+      storage: 1Gi
+    replicas: 1
+    revisionHistoryLimit: 10
+    strategy_type: RollingUpdate
+    container:
+      name: datagrok
+      image: datagrok/datagrok
+      tag: latest
+      port: 8080
+    service:
+      type: ClusterIP
+    
+    livenessProbe:
+      httpGet:
+        path: /api/admin/health
+        port: 8080
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20 # default
+    readinessProbe:
+      httpGet:
+        path: /api/admin/health
+        port: 8080
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20
+    startupProbe:
+      httpGet:
+        path: /api/admin/health
+        port: 8080
+      failureThreshold: 90
+      periodSeconds: 30
+    ingress:
+      enabled: true
+      annotations: {}
+      tls: {}
+      hosts:
+        - host: datagrok.datagrok.internal
+          version: "1.18.5"
+          paths:
+          - path: /
+            backend:
+              serviceName: datagrok-service
+              servicePort: http
+  database:
+    name: database
+    configmap:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "superuser"
+      POSTGRES_PASSWORD: "WaebwkeBVym11JkNtX6LDuu1dUQEcZGYgVv6"
+    service:
+      type: ClusterIP
+    statefulset:
+      minReadySeconds: 10
+      replicas: 1
+      pod:
+        annotations: 
+          asd: asd
+        labels: 
+          service: db
+        terminationGracePeriodSeconds: 10
+        container:
+          name: database
+          image: postgres
+          imagePullPolicy: Always
+          tag: 12
+          port: 5432
+          volume:
+            path: /data
+    volumeClaimTemplates:
+      name: db-data
+      accessMode: [ "ReadWriteOnce" ]
+      storageClassName: standard
+      storage: 1Gi
+
+  grok_connect:
+    restartPolicy: Always
+    labels:
+      service: grok-connect
+    strategy_type: RollingUpdate
+    container:
+      name: grok-connect
+      image: datagrok/grok_connect
+      tag: latest
+      port: 1234
+    service:
+      type: ClusterIP
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 1234
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20 # default
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: 1234
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20
+    startupProbe:
+      httpGet:
+        path: /health
+        port: 1234
+      failureThreshold: 90
+      periodSeconds: 30
+cvm:
+  enabled: true
+  jkg:
+    enabled: false
+    restartPolicy: Always
+    labels:
+      service: jkg
+    strategy_type: RollingUpdate
+    container:
+      name: jkg
+      image: datagrok/jupyter_kernel_gateway
+      tag: latest
+      ports:
+        jupyter: 
+          name: jupyter
+          port: 8888
+        helper: 
+          name: helper
+          port: 5005
+    service:
+      type: ClusterIP
+    livenessProbe:
+      httpGet:
+        path: /jupyter/helper/info
+        port: 5005
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20 # default
+    readinessProbe:
+      httpGet:
+        path: /jupyter/helper/info
+        port: 5005
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20
+    startupProbe:
+      httpGet:
+        path: /jupyter/helper/info
+        port: 5005
+      failureThreshold: 90
+      periodSeconds: 30
+
+  jupyter_notebook:
+    enabled: false
+    restartPolicy: Always
+    labels:
+      service: jupyter-notebook
+    strategy_type: RollingUpdate
+    container:
+      name: jupyter-notebook
+      image: datagrok/jupyter_notebook
+      tag: latest
+      ports:
+        notebook: 
+          name: notebook
+          port: 8889
+        helper: 
+          name: helper
+          port: 5005
+    service:
+      type: ClusterIP
+    livenessProbe:
+      httpGet:
+        path: /notebook/helper/info
+        port: 5005
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20 # default
+    readinessProbe:
+      httpGet:
+        path: /notebook/helper/info
+        port: 5005
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20
+    startupProbe:
+      httpGet:
+        path: /notebook/helper/info
+        port: 5005
+      failureThreshold: 90
+      periodSeconds: 30
+
+  grok_compute:
+    enabled: false
+    restartPolicy: Always
+    labels:
+      service: grok-compute
+    strategy_type: RollingUpdate
+    container:
+      name: grok-compute
+      image: datagrok/grok_compute
+      tag: latest
+      port: 5005
+    service:
+      type: ClusterIP
+    livenessProbe:
+      httpGet:
+        path: /grok_compute/info
+        port: 5005
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20 # default
+    readinessProbe:
+      httpGet:
+        path: /grok_compute/info
+        port: 5005
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20
+    startupProbe:
+      httpGet:
+        path: /grok_compute/info
+        port: 5005
+      failureThreshold: 90
+      periodSeconds: 30
+
+  h2o:
+    enabled: false
+    restartPolicy: Always
+    labels:
+      service: h2o
+    strategy_type: RollingUpdate
+    container:
+      name: h2o
+      image: datagrok/h2o
+      tag: latest
+      ports:
+        http: 
+          name: http
+          port: 54321
+        helper: 
+          name: helper
+          port: 5005
+    service:
+      type: ClusterIP
+    livenessProbe:
+      httpGet:
+        path: /helper/info
+        port: 5005
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20 # default
+    readinessProbe:
+      httpGet:
+        path: /helper/info
+        port: 5005
+      failureThreshold: 3
+      timeoutSeconds: 10
+      periodSeconds: 20
+    startupProbe:
+      httpGet:
+        path: /helper/info
+        port: 5005
+      failureThreshold: 90
+      periodSeconds: 30
+
+
+
+
+# mount secret as a volume
+#mountSecrets:
+#  secret_name: mount_path

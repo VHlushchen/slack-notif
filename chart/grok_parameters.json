@@ -1,0 +1,12 @@
+{
+    "deployDemo": false,
+    "dbServer": "database",
+    "db": "datagrok",
+    "dbAdminLogin": "superuser",
+    "dbAdminPassword": "WaebwkeBVym11JkNtX6LDuu1dUQEcZGYgVv6",
+    "dbLogin": "dg",
+    "dbPassword": "dg",
+    "adminPassword": "admin",
+    "adminDevKey": "admin",
+    "isolatesCount": 2
+  }

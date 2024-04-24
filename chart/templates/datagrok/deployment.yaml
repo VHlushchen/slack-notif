@@ -1,0 +1,71 @@
+{{- if .Values.core.enabled -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  {{- with .Values.core.datagrok.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{ include "base.defaultLabels" . | nindent 4 }}
+  name: {{ include "base.fullname" . }}
+spec:
+  replicas: {{ .Values.core.datagrok.replicas }}
+  revisionHistoryLimit: {{ .Values.core.datagrok.revisionHistoryLimit }}
+  selector:
+    {{- with .Values.core.datagrok.labels }}
+    matchLabels:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
+      {{ include "base.selectorLabels" . | nindent 8 }}
+  strategy:
+    type: {{ .Values.core.datagrok.strategy_type }}
+  template:
+    metadata:
+      {{- with .Values.core.datagrok.labels }}
+      labels:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- include "base.selectorLabels" . | nindent 8 }}
+    spec:
+      initContainers:
+        - name: init-wait-for-db
+          image: alpine
+          command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 database 5432 && exit 0 || sleep 3; done; exit 1"]
+      containers:
+        - envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-grok-parameters-configmap             
+          image: datagrok/datagrok:1.18.3
+          imagePullPolicy: Always
+          name: datagrok
+          ports:
+            - containerPort: {{ .Values.core.datagrok.container.port }}
+          tty: true
+          {{- with .Values.core.datagrok.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.core.datagrok.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.core.datagrok.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /home/grok/data
+              name: datagrok-data
+            - mountPath: /home/grok/cfg
+              name: datagrok-cfg
+      restartPolicy: Always
+      volumes:
+        - name: datagrok-data
+          persistentVolumeClaim:
+            claimName: {{ include "base.fullname" . }}-{{ .Values.core.datagrok.data_pvc.name }}
+        - name: datagrok-cfg
+          persistentVolumeClaim:
+            claimName: {{ include "base.fullname" . }}-{{ .Values.core.datagrok.cfg_pvc.name }}
+{{- end }}

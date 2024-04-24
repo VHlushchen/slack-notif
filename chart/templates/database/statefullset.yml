@@ -1,0 +1,64 @@
+{{- if .Values.core.enabled -}}
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "base.fullname" . }}-db
+  {{- with .Values.core.database.statefulset.pod.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+    {{ include "base.defaultLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.core.database.statefulset.replicas }}
+  serviceName: {{ include "base.fullname" . }}-db
+  replicas: {{ .Values.core.database.statefulset.replicas }}
+  minReadySeconds: {{ .Values.core.database.statefulset.minReadySeconds }}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+  updateStrategy: 
+    type: "RollingUpdate"
+  selector:
+    {{- with .Values.core.database.statefulset.pod.labels }}
+    matchLabels:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
+      {{ include "base.selectorLabels" . | nindent 8 }}
+  template:
+    metadata:
+      {{- with .Values.core.database.statefulset.pod.labels }}
+      labels:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{ include "base.selectorLabels" . | nindent 8 }}
+      {{- with .Values.core.database.statefulset.pod.annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }} 
+    spec:
+      terminationGracePeriodSeconds: {{ .Values.core.database.statefulset.pod.terminationGracePeriodSeconds }}
+      containers:
+        - name: {{ include "base.fullname" . }}-{{ .Values.core.database.statefulset.pod.container.name }}
+          image: {{ .Values.core.database.statefulset.pod.container.image }}:{{ .Values.core.database.statefulset.pod.container.tag }}
+          imagePullPolicy: Always
+          ports:
+          - name: http
+            containerPort: {{ .Values.core.database.statefulset.pod.container.port  }}
+            protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-db-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.core.database.statefulset.pod.container.volume.path }}
+              name: {{ .Values.core.database.volumeClaimTemplates.name }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.core.database.volumeClaimTemplates.name }}
+      spec:
+        accessModes: {{ .Values.core.database.volumeClaimTemplates.accessMode }}
+        storageClassName: {{ .Values.core.database.volumeClaimTemplates.storageClassName | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.core.database.volumeClaimTemplates.storage }}
+{{- end }}

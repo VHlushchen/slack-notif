@@ -1,0 +1,10 @@
+{{- if .Values.core.enabled -}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grok-parameters-configmap
+data: 
+  GROK_PARAMETERS: |-
+{{ .Files.Get "grok_parameters.json" | indent 4 }}
+{{- end }}

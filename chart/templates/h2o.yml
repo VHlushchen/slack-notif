@@ -1,0 +1,78 @@
+{{- if or .Values.cvm.h2o.enabled .Values.cvm.enabled -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "base.fullname" . }}-{{ .Values.cvm.h2o.container.name }}
+  namespace: {{ .Release.Namespace }}
+  {{- with .Values.cvm.h2o.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{ include "base.defaultLabels" . | nindent 4 }} 
+  
+spec:
+  replicas: {{ .Values.cvm.h2o.replicas }}
+  selector:
+    {{- with .Values.cvm.h2o.labels }}
+    matchLabels:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- include "base.selectorLabels" . | nindent 8 }}
+  strategy:
+    type: {{ .Values.cvm.h2o.strategy_type}}
+  template:
+    metadata:
+      {{- with .Values.cvm.h2o.labels }}
+      labels:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- include "base.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - image: {{ .Values.cvm.h2o.container.image }}:{{ .Values.cvm.h2o.container.tag }}
+          imagePullPolicy: {{ .Values.cvm.h2o.container.imagePullPolicy }}
+          name: {{ .Values.cvm.h2o.container.name }}
+          {{- with .Values.cvm.h2o.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.cvm.h2o.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.cvm.h2o.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.cvm.h2o.container.ports.http.port }}
+            - containerPort: {{ .Values.cvm.h2o.container.ports.helper.port }}
+      restartPolicy: {{ .Values.cvm.h2o.restartPolicy }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.cvm.h2o.container.name }}
+  labels:
+{{ include "base.defaultLabels" . | nindent 4 }}
+spec:
+  type: {{ .Values.cvm.h2o.service.type }}
+  ports:
+    - port: {{ .Values.cvm.h2o.container.ports.http.port  }}
+      targetPort: {{ .Values.cvm.h2o.container.ports.http.port }}
+      protocol: TCP
+      name: {{ .Values.cvm.h2o.container.ports.http.name }} 
+    - port: {{ .Values.cvm.h2o.container.ports.helper.port  }}
+      targetPort: {{ .Values.cvm.h2o.container.ports.helper.port }}
+      protocol: TCP
+      name: {{ .Values.cvm.h2o.container.ports.helper.name }} 
+  {{- with .Values.cvm.h2o.labels }}
+  selector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+    {{- include "base.selectorLabels" . | nindent 4 }}
+ 
+{{- end   }}
