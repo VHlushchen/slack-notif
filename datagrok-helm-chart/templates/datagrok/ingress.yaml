@@ -24,7 +24,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    - host: "{{ .Values.version | replace "." "-" }}.datagrok.internal"
+    - host: "{{ .Values.core.datagrok.container.tag | replace "." "-" }}.datagrok.internal"
     {{- range .Values.core.datagrok.ingress.hosts }}
       http:
         paths:
