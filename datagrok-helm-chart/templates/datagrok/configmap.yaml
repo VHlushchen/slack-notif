@@ -6,5 +6,26 @@ metadata:
   name: {{ .Release.Name }}-grok-parameters-configmap
 data: 
   GROK_PARAMETERS: |-
-{{ .Files.Get "grok_parameters.json" | indent 4 }}
+    {
+      {{- $len := sub (len .Values.core.datagrok.grok_parameters) 1 }}
+      {{- $count := 1 }}
+      {{- range $key, $value := .Values.core.datagrok.grok_parameters }}
+      {{ if le $count $len }}
+        {{- if kindIs "string" $value }}
+          {{- $key | quote | indent 2}}: {{ $value | quote }},
+        {{- else }}
+          {{- $key | quote | indent 2}}: {{ $value }},
+        {{- end }}
+        {{- $count = add $count 1 }}
+      {{- else }}
+        {{- if kindIs "string" $value }}
+          {{- $key | quote | indent 2}}: {{ $value | quote }}
+        {{- else }}
+          {{- $key | quote | indent 2}}: {{ $value }}
+        {{- end }}
+        {{- $count = add $count 1 }}
+      {{- $count = add $count 1 }}
+      {{- end }}
+      {{- end }}
+      }
 {{- end }}

@@ -24,6 +24,17 @@ core:
       port: 8080
     service:
       type: ClusterIP
+    grok_parameters:
+      deployDemo: false
+      dbServer: "database"
+      db: "datagrok"
+      dbAdminLogin: "superuser"
+      dbAdminPassword: "WaebwkeBVym11JkNtX6LDuu1dUQEcZGYgVv6"
+      dbLogin: "dg"
+      dbPassword: "dg"
+      adminPassword: "admin"
+      adminDevKey: "admin"
+      isolatesCount: 2
     
     livenessProbe:
       httpGet:
@@ -58,6 +69,7 @@ core:
               serviceName: datagrok-service
               servicePort: http
   database:
+    enabled: true
     name: database
     configmap:
       POSTGRES_DB: "postgres"
@@ -161,6 +173,19 @@ cvm:
         port: 5005
       failureThreshold: 90
       periodSeconds: 30
+    grok_parameters:
+      dbServer: "database"
+      dbPort: "5432"
+      db: "datagrok"
+      dbLogin: "dg"
+      dbPassword: "dg"
+      isolatesCount: 1
+      deployDemo: false
+      deployTestDemo: false
+      datlasApiUrl: "http://datagrok:8082"
+      jupyterToken: "4b8ed936cf61a1c5e37a8b3a845599941c272de6e29330a0"
+      capabilities: ["jupyter"]
+  
 
   jupyter_notebook:
     enabled: false
