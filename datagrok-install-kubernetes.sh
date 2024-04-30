@@ -29,6 +29,7 @@ function count_down() {
     echo " 0"
 }
 
+
 function Help() {
   echo "Script to deploy local kubernetes with datagrok."
   echo
@@ -132,6 +133,7 @@ function check_kubectl() {
     fi
 }
 
+
 function check_minikube() {
 
     if ! [ -x "$(command -v minikube)" ]; then
@@ -172,12 +174,24 @@ function check_minikube() {
     fi
     # sleep 10
 }
+check_any_pod_not_running() {
+    local namespace=$1
+    while read -r pod status; do
+        if [[ "$status" != "Running" ]]; then
+            return 0
+        fi
+    done < <(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.phase}{"\n"}{end}')
+    return 1
+}
 
 function deploy_helm {
     timeout=60
     datagrok_local_url="http://datagrok.datagrok.internal"
     helm_repo="datagrok-test"
     helm_deployment_name="datagrok"
+    timeout_deploy=300
+    start_time=$(date +%s)
+
 
     local namespace="${1}"
     local cvm_only="$2"
@@ -340,8 +354,18 @@ function deploy_helm {
             --set cvm.jkg.grok_parameters.dbPassword=$dbPassword
         fi
     fi
-    sleep 10
-    message "pods status"
+    while check_any_pod_not_running $namespace; do
+        current_time=$(date +%s)
+        elapsed_time=$((current_time - start_time))
+        if (( elapsed_time >= timeout )); then
+            echo "Timeout reached. Not all pods are running."
+            exit 1
+        fi
+        echo "Not all pods are running. Waiting..."
+        sleep 10  # Adjust the delay as needed
+    done
+
+    message "All pods are running!"
     kubectl get pods -n $namespace
     message "services status"
     kubectl get svc -n $namespace
