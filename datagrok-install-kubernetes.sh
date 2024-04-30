@@ -375,7 +375,7 @@ function deploy_helm {
                         echo "$pvc   $status"
                     else
                         echo "$pvc   $status"
-                        exit 1
+                        sleep 10
                     fi
                 else
                     helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
@@ -465,30 +465,27 @@ function deploy_helm {
         message "ingress status"
         kubectl get ingress -n $namespace
     fi
-    echo "browser $browser"
+    url="http://${datagrok_version//./-}.datagrok.internal"
+    response=$(curl -s -I "$url")
+    
+    if [[ $response == *"HTTP/1.1 200 OK"* ]]; then
+        echo "The URL $url returned a 200 status code."
+    fi
     if [[ $browser == true ]]; then
-        url="http://${datagrok_version//./-}.datagrok.internal"
-        response=$(curl -s -I "$url")
         timeout=10
-
-# Check if the response contains "HTTP/1.1 200 OK"
-        if [[ $response == *"HTTP/1.1 200 OK"* ]]; then
-            echo "The URL $url returned a 200 status code."
-            message "Waiting while the Datagrok server is starting"
-            echo "When the browser opens, use the following credentials to log in:"
-            echo "------------------------------"
-            echo -ne "${GREEN}"
-            echo "Login:    admin"
-            echo "Password: admin"
-            echo -ne "${RESET}"
-            echo "------------------------------"
-            echo "If you see the message 'Datagrok server is unavaliable' just wait for a while and reload the web page "
-            count_down ${timeout}
-            message "Running browser"
-            xdg-open $url
-            message "If the browser hasn't open, use the following link: $url" 
-            message "To extend Datagrok fucntionality, install extension packages on the 'Manage -> Packages' page"
-        fi
+        echo "When the browser opens, use the following credentials to log in:"
+        echo "------------------------------"
+        echo -ne "${GREEN}"
+        echo "Login:    admin"
+        echo "Password: admin"
+        echo -ne "${RESET}"
+        echo "------------------------------"
+        echo "If you see the message 'Datagrok server is unavaliable' just wait for a while and reload the web page "
+        count_down ${timeout}
+        message "Running browser"
+        xdg-open $url
+        message "If the browser hasn't open, use the following link: $url" 
+        message "To extend Datagrok fucntionality, install extension packages on the 'Manage -> Packages' page"
     fi
   
 }
