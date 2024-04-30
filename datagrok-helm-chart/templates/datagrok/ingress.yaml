@@ -24,8 +24,9 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    - host: "{{ .Values.core.datagrok.container.tag | replace "." "-" }}.datagrok.internal"
+    {{ $subdomain := .Values.core.datagrok.container.tag | replace "." "-" }}
     {{- range .Values.core.datagrok.ingress.hosts }}
+    - host: "{{ $subdomain }}.{{ .host }}"
       http:
         paths:
           {{- range .paths }}

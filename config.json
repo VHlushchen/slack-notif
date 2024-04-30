@@ -1,0 +1,10 @@
+{
+    "deployDemo": false,
+    "database_host": "192.168.49.1",
+    "database_name": "datagrok",
+    "database_port": 5432,
+    "database_admin_username": "postgres",
+    "database_admin_password": "postgres",
+    "database_datagrok_username": "dg",
+    "database_datagrok_password": "dg"
+  }

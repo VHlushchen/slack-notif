@@ -61,8 +61,7 @@ core:
       annotations: {}
       tls: {}
       hosts:
-        - host: datagrok
-          version: ""
+        - host: datagrok.internal
           paths:
           - path: /
             backend:
@@ -184,7 +183,8 @@ cvm:
       deployTestDemo: false
       datlasApiUrl: "http://datagrok:8082"
       jupyterToken: "4b8ed936cf61a1c5e37a8b3a845599941c272de6e29330a0"
-      capabilities: ["jupyter"]
+      capabilities: 
+        - "jupyter"
   
 
   jupyter_notebook:

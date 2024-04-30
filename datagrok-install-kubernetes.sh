@@ -29,6 +29,68 @@ function count_down() {
     echo " 0"
 }
 
+function Help() {
+  echo "Script to deploy local kubernetes with datagrok."
+  echo
+  echo "Syntax: ./buildx_docker_image.sh [start/update/delete/purge]"
+  echo "options:"
+  echo ""
+  echo "Command"
+  echo "./datagrok-install-kubernetes.sh start"
+  echo "Installing local kubernetes and deploying datagrok"
+  echo "./datagrok-install-kubernetes.sh update"
+  echo "Updating the current configuration associated with changes "
+  echo "./datagrok-install-kubernetes.sh delete"
+  echo "Removal of datagrok deployment"
+  echo "./datagrok-install-kubernetes.sh purge"
+  echo "Full clean up of the datagrok environment" 
+  echo "                Services"
+  echo "Deploying separate service"
+  echo "--datagrok"
+  echo "    Deploying only datagrok services"
+  echo "--cvm"
+  echo "    CVM services deployment only"
+  echo "-jkg|--jupyter-kernel-gateway"
+  echo "    'Jupyter Kernel Gateway deployment only"
+  echo "-jn|--jupyter_notebook"
+  echo  "    'Jupyter Notebook deployment only'"
+  echo "-gc|--grok_compute"
+  echo "    Grok Compute deployment only"
+  echo "h2o|--h2o"
+  echo "    h2o deployment only"
+  echo ""
+  echo "                Versions"
+  echo "Default deployment uses the latest version for all services"
+  echo "You can use flags to use a specific version"
+  echo "-v|--datagrok-version <version>"
+  echo "    set specific datagrok version"
+  echo "    Config-file: datagrok_version"
+  echo "    Default: latest"
+  echo "-gc-v|--grok-compute-version <version>"
+  echo "    Set specific datagrok-compute version."
+  echo "    Config-file: grok_compute_version"
+  echo "    Default: latest"
+  echo "-jkg-v|--jupyter-kernel-gateway-version <version>"
+  echo "    Set specific Jupyter Kernel Gateway version."
+  echo "    Config-file: jkg_version"
+  echo "    Default: latest"
+  echo "-h2o-v|--h2o-version <version>"
+  echo "    Set specific h2o version."
+  echo "    Config-file: h2o_version"
+  echo "    Default: latest"
+  echo "-gn-v|--grok-connect-version <version>"
+  echo "    Set specific datagrok connect version."
+  echo "    Config-file: grok_connect_version"
+  echo "    Default: latest"
+  echo "-jn-v|--jupyter-notebook-version <version>"
+  echo "    Set specific Jupyter Notebook version."
+  echo "    Config-file: jupyter_notebook_version"
+  echo "    Default: latest"
+  echo "    Custom tags to apply to the image."
+  echo "    Multiple options can be used during one script run."
+  echo "    Default: empty"
+}
+
 function check_docker() {
     if [ ! -x "$(command -v docker)" ]; then
         error "Docker engine is not installed"
@@ -45,6 +107,18 @@ function check_docker_daemon() {
     }
 }
 
+function check_local_bin {
+    if [[ ":$PATH:" == *":/usr/local/bin:"* ]]; then
+        message "/usr/local/bin is in the PATH"
+    else
+        echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bashrc
+        # Update the current session's PATH
+        export PATH="/usr/local/bin:$PATH"
+        message "/usr/local/bin has been added to the PATH"
+
+    fi
+
+}
 function check_kubectl() {
     if ! [ -x "$(command -v kubectl)" ]; then
         message "Installing kubectl..."
@@ -73,12 +147,13 @@ function check_minikube() {
     else
         message "minikube is already installed"
     fi
-    if [[ $(minikube status -o json | jq -r .Host) != "Running" ]]; then
+    if [[ $(minikube status -o json | jq -r .Host) != "Running" || $(minikube status -o json | jq -r .Host) != "Kubelet"  || $(minikube status -o json | jq -r .Host) != "APIServer" ]]; then
 
         message "Starting minikube..."
         /usr/local/bin/minikube start
     else
         message "minikube is already up and running"
+         sudo tee -a /etc/hosts >/dev/null
     fi
     message "Check context"
     if [ $(kubectl config current-context) != 'minikube' ]; then
@@ -110,32 +185,26 @@ function deploy_helm {
     local jupyter_notebook="$6"
     local grok_compute="$7"
     local command="$8"
-    local datagrok_version="$9"
-    local jkg_version="${10}"
-    local h2o_version="${11}"
-    local grok_connect_version=${12}
-    local jupyter_notebook_version="${13}"
-    local grok_compute_version=${14}
+    local datagrok_version="$9"             #versions["datagrok"]
+    local jkg_version="${10}"               #versions["jkg"]
+    local h2o_version="${11}"               #versions["h2o"]
+    local grok_connect_version=${12}        #versions["grok_connect"]
+    local jupyter_notebook_version="${13}"  #versions["jupyter_notebook"]
+    local grok_compute_version=${14}        #versions["grok_compute"]
     local helm_version=${15}    
     local database_internal=${16}
-    local dbServer=${17}
-    local db=${18}      
-    local dbAdminLogin=${19}
-    local dbAdminPassword=${20}
-    local dbLogin=${21}
-    local dbPassword=${22}
-
-
-
-
-
-    
-
+    local dbServer=${17}                    #database_host
+    local dbPort=${18}                      #database_port
+    local db=${19}                          #database_name    
+    local dbAdminLogin=${20}                #database_admin_username
+    local dbAdminPassword=${21}             #database_admin_password
+    local dbLogin=${22}                     #database_datagrok_username
+    local dbPassword=${23}                  #database_datagrok_password
+                                    
     if [[ $cvm_only == false && $core_only == false && $jkg == false && $h2o == false && $jupyter_notebook == false && $grok_compute == false ]]; then
         cvm_only=true
         core_only=true
     fi
-    echo $database_internal
     if [[ $database_internal == true ]]; then
         if [ $command == "start" ]; then
             if kubectl get namespace $namespace &> /dev/null; then
@@ -153,6 +222,7 @@ function deploy_helm {
             if [[ $(helm list -n $namespace -o json | jq -r .[].name) == $helm_deployment_name ]]; then
                 message "$helm_deployment_name is already deployed on the cluster. Run the <./datagrok-install-kubernetes.sh update> to update the datagrok"
             fi
+            echo $datagrok_version
             helm upgrade --install $helm_deployment_name datagrok-helm-chart -n $namespace -f datagrok-helm-chart/values.yaml \
             --version $helm_version \
             --set cvm.enabled=$cvm_only \
@@ -192,7 +262,6 @@ function deploy_helm {
             --set cvm.h2o.container.tag=$h2o_version
         fi
     else
-        echo $db
         if [ $command == "start" ]; then
             if kubectl get namespace $namespace &> /dev/null; then
                 message "Namespace $namespace exists."
@@ -259,7 +328,19 @@ function deploy_helm {
             --set cvm.jkg.container.tag=$jkg_version \
             --set cvm.jupyter_notebook.container.tag=$jupyter_notebook_version \
             --set cvm.grok_compute.container.tag=$grok_compute_version \
-            --set cvm.h2o.container.tag=$h2o_version
+            --set cvm.h2o.container.tag=$h2o_version \
+            --set core.database.enabled=$database_internal \
+            --set core.datagrok.grok_parameters.dbServer=$dbServer \
+            --set core.datagrok.grok_parameters.db=$db \
+            --set core.datagrok.grok_parameters.dbAdminLogin=$dbAdminLogin \
+            --set core.datagrok.grok_parameters.dbAdminPassword=$dbAdminPassword \
+            --set core.datagrok.grok_parameters.dbLogin=$dbLogin \
+            --set core.datagrok.grok_parameters.dbPassword=$dbPassword \
+            --set cvm.jkg.grok_parameters.dbServer=$dbServer \
+            --set cvm.jkg.grok_parameters.db=$db \
+            --set cvm.jkg.grok_parameters.dbPort=$dbPort \
+            --set cvm.jkg.grok_parameters.dbLogin=$dbLogin \
+            --set cvm.jkg.grok_parameters.dbPassword=$dbPassword
         fi
     fi
     sleep 10
@@ -340,35 +421,27 @@ function datagrok_purge {
 function datagrok_install {
     check_docker
     check_docker_daemon
+    check_local_bin
     check_kubectl
     check_minikube
     check_helm
 }
 
 # === Main part of the script starts from here ===
-datagrok_version="latest"
-jkg_version="latest" 
-h2o_version="latest"
-grok_compute_version="latest"
-jupyter_notebook_version="latest"
-grok_connect_version="latest"
+
 helm_version="1.0.1"
 namespace=""
+host=""
 
 #database 
 
-dbServer=""
-dbPort=""
-db=""
-dbLogin=""
-dbPassword=""
-dbAdminLogin=""
-dbAdminPassword=""
+
 
 start=false
 update=false
 delete=false
 purge=false
+
 
 database_internal=true
 cvm_only=false
@@ -379,6 +452,29 @@ jupyter_notebook=false
 grok_compute=false
 update=false
 command=""
+
+#config
+config_file=false
+config_status=""
+config_file_path=""
+
+declare -A versions=(
+    ["datagrok"]="latest"
+    ["jkg"]="latest"
+    ["h2o"]="latest"
+    ["grok_compute"]="latest"
+    ["grok_connect"]="latest"
+    ["jupyter_notebook"]="latest"
+)
+declare -A db_creds=(
+    ["database_host"]=""
+    ["database_port"]=""
+    ["database_name"]="" 
+    ["database_admin_username"]="" 
+    ["database_admin_password"]="" 
+    ["database_datagrok_username"]="" 
+    ["database_datagrok_password"]="" 
+    )
 
 if [[ "$#" -eq 0 ]]; then
     datagrok_install
@@ -392,21 +488,24 @@ while [[ "$#" -gt 0 ]]; do
         start) start=true ;;
         delete) delete=true ;;
         update) update=true ;;
+        help) Help;;
+        --help) Help;;
         -n|--namespace) shift; namespace="$1";;
-        -db|--database) database_internal=false;;
-        -jkg-v|--jupyter-kernel-gateway-version) shift; jkg_version="$1";;
-        -h2o-v|--h2o-version) shift; h2o_version="$1";;
-        -gc-v|--grok-compute-version) shift; grok_compute_version="$1";;
-        -gn-v|--grok-connect-version) shift; grok_connect_version="$1";;
-        -jn-v|--jupyter-notebook-version) shift; jupyter_notebook_version="$1";;
-        -v|--datagrok-version) shift; datagrok_version="$1";;
+        --config) shift; start=true config_file=true config_file_path="$1";;
+        -jkg-v|--jupyter-kernel-gateway-version) shift; versions["jkg"]="$1";;
+        -h2o-v|--h2o-version) shift; versions["h2o"]="$1";;
+        -gc-v|--grok-compute-version) shift; versions["grok_compute"]="$1";;
+        -gn-v|--grok-connect-version) shift; versions["grok_connect"]="$1";;
+        -jn-v|--jupyter-notebook-version) shift; versions["jupyter_notebook"]="$1";;
+        -v|--datagrok-version) shift; start=true versions["datagrok"]="$1";;
+        --host) shift; host="$1";;
         --helm-version) shift; helm_version="$1";;
-        --cvm) cvm_only=true,;;
-        --datagrok) core_only=true;;
-        -jkg|--jupyter-kernel-gateway) jkg=true;;
-        -jn|--jupyter_notebook) jupyter_notebook=true;;
-        -gc|--grok_compute) grok_compute=true;;
-        -h2o|--h2o) h2o=true;;
+        --cvm) start=true, cvm_only=true,;;
+        --datagrok) start=true core_only=true;;
+        -jkg|--jupyter-kernel-gateway) start=true jkg=true;;
+        -jn|--jupyter_notebook) start=true jupyter_notebook=true;;
+        -gc|--grok_compute) start=true  grok_compute=true;;
+        -h2o|--h2o) start=true h2o=true;;
         *) echo "Unknown parameter passed: $1"; exit 1;;
         # purge) datagrok_purge ;;
         help | "-h" | "--help")
@@ -418,26 +517,47 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 
-if [[ $namespace == "" ]]; then
-    namespace_gen="datagrok-$datagrok_version"
-    namespace=${namespace_gen//./-}
+if [[ "${versions["datagrok"]}" == "bleeding-edge" && $start == true || $update == true ]]; then
+    message "Version of all services changed to bleeding-edge"
+    versions=(
+        ["datagrok"]="bleeding-edge"
+        ["jkg"]="bleeding-edge"
+        ["h2o"]="bleeding-edge"
+        ["grok_compute"]="bleeding-edge"
+        ["grok_connect"]="bleeding-edge"
+        ["jupyter_notebook"]="bleeding-edge"
+    )
 fi
-if [[ $database_internal == false ]]; then
-    read -p read -p "Please enter the database host: " dbServer
-    message "You entered the database host as: $dbServer"
-    read -p read -p "Please enter the database host: " dbPort
-    message "You entered the database port as: $dbPort"
-    read -p read -p "Please enter the database host: " db
-    message "You entered the database name as: $db"
-    read -p read -p "Please enter the database host: " dbAdminLogin
-    message "You entered the database admin username as: $dbAdminLogin"
-    read -p read -p "Please enter the database host: " dbAdminPassword
-    message "You entered the database admin password as: $dbAdminPassword"
-    read -p read -p "Please enter the database username: " dbLogin
-    message "You entered the database host as: $dbLogin"
-    read -p read -p "Please enter the database pasword: " dbPassword
-    message "You entered the database host as: $dbPassword"
 
+if [[ $config_file == true ]]; then
+    if grep -q "database_" $config_file_path; then
+        database_internal=false
+        for key in "${!db_creds[@]}"; do
+                if [ $(jq --arg key "$key" 'has($key)' $config_file_path) == true ]; then
+                    db_creds[$key]=$(jq .$key $config_file_path)
+                else
+                    message "!!! $key does not exist. Please add to config file"
+                    config_status="Failed"
+                    exit 1
+                fi
+        done
+    fi
+    for key in "${!versions[@]}"; do
+        if [ $(jq --arg key "${key}_version" 'has($key)' $config_file_path) == true ]; then
+            versions[$key]=$(jq ".${key}_version" $config_file_path)
+            message ">>> Version changed for service $key to ${versions[${key}]}"
+        else
+            message "== ${key}_version is not specified in the config file, the version of $key has not changed"
+            message "== Version of the ${key} is ${versions[$key]}"
+        fi
+    done
+    start=true  
+fi
+
+
+if [[ $namespace == "" ]]; then
+    namespace_gen="datagrok-${versions["datagrok"]//\"/}"
+    namespace=${namespace_gen//./-}
 fi
 
 if [[ $start == true ]]; then
@@ -451,26 +571,26 @@ if [[ $start == true ]]; then
     $jupyter_notebook \
     $grok_compute \
     $command \
-    $datagrok_version \
-    $jkg_version \
-    $h2o_version \
-    $grok_connect_version \
-    $jupyter_notebook_version \
-    $grok_compute_version \
+    ${versions["datagrok"]//\"/} \
+    ${versions["jkg"]//\"/} \
+    ${versions["h2o"]//\"/} \
+    ${versions["grok_connect"]//\"/} \
+    ${versions["jupyter_notebook"]//\"/} \
+    ${versions["grok_compute"]//\"/} \
     $helm_version \
     $database_internal \
-    $dbServer \
-    $db \
-    $dbAdminLogin \
-    $dbAdminPassword \
-    $dbLogin \
-    $dbPassword \
+    ${db_creds["database_host"]//\"/} \
+    ${db_creds["database_port"]//\"/} \
+    ${db_creds["database_name"]//\"/} \
+    ${db_creds["database_admin_username"]//\"/} \
+    ${db_creds["database_admin_password"]//\"/} \
+    ${db_creds["database_datagrok_username"]//\"/} \
+    ${db_creds["database_datagrok_password"]//\"/} 
     
 fi
 
 if [[ $update == true ]]; then
     command="update"
-    deploy_helm \
     $namespace \
     $cvm_only \
     $core_only \
@@ -479,14 +599,21 @@ if [[ $update == true ]]; then
     $jupyter_notebook \
     $grok_compute \
     $command \
-    $datagrok_version \
-    $jkg_version \
-    $h2o_version \
-    $grok_connect_version \
-    $jupyter_notebook_version \
-    $grok_compute_version \
-    $helm_version
-    # echo $helm_version 
+    ${versions["datagrok"]//\"/} \
+    ${versions["jkg"]//\"/} \
+    ${versions["h2o"]//\"/} \
+    ${versions["grok_connect"]//\"/} \
+    ${versions["jupyter_notebook"]//\"/} \
+    ${versions["grok_compute"]//\"/} \
+    $helm_version \
+    $database_internal \
+    ${db_creds["database_host"]//\"/} \
+    ${db_creds["database_port"]//\"/} \
+    ${db_creds["database_name"]//\"/} \
+    ${db_creds["database_admin_username"]//\"/} \
+    ${db_creds["database_admin_password"]//\"/} \
+    ${db_creds["database_datagrok_username"]//\"/} \
+    ${db_creds["database_datagrok_password"]//\"/} 
 fi
 if [[ $delete == true ]]; then
     datagrok_delete $namespace

@@ -3,9 +3,9 @@ entries:
   datagrok:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-04-24T18:51:00.644464468+03:00"
+    created: "2024-04-30T12:21:16.636790351+03:00"
     description: A Helm chart for Kubernetes
-    digest: 44eb400eb4b8252d570a4a76ad1c5273a89c92c63ac39c654c478ea37fb3bedd
+    digest: 916cc52ce19022b3e21f13b2992342659916f2998bf1df69162309428792f911
     name: datagrok
     type: application
     urls:
@@ -13,8 +13,18 @@ entries:
     version: 1.0.1
   datagrok-test:
   - apiVersion: v2
+    appVersion: latest
+    created: "2024-04-30T12:21:16.651221943+03:00"
+    description: A Helm chart for Kubernetes
+    digest: 7258a5c2f81add2fd200e6c0032eab42531138c6a8b854c6a7972d8d0a07ab01
+    name: datagrok-test
+    type: application
+    urls:
+    - datagrok-test-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-04-24T18:51:00.645164489+03:00"
+    created: "2024-04-30T12:21:16.648241506+03:00"
     description: A Helm chart for Kubernetes
     digest: 954a6592203ede412a27e1e8c44e1e4b943a417bb8e571a69d9c0fa477561f84
     name: datagrok-test
@@ -22,4 +32,4 @@ entries:
     urls:
     - datagrok-test-1.0.1.tgz
     version: 1.0.1
-generated: "2024-04-24T18:51:00.643620922+03:00"
+generated: "2024-04-30T12:21:16.63590671+03:00"
