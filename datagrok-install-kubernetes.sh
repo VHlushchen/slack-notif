@@ -167,6 +167,7 @@ function check_minikube() {
     else
         message "install Nginx Ingress controller"
         minikube addons enable ingress
+        kubectl get validatingwebhookconfigurations 
     fi
     sleep 10
 }
