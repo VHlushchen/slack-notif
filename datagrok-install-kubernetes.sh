@@ -499,7 +499,7 @@ while [[ "$#" -gt 0 ]]; do
         --host) shift; host="$1";;
         --helm-version) shift; helm_version="$1";;
         --cvm) start=true, cvm_only=true;;
-        --auto-tests) start=true browser=false datagrok_install;;
+        --auto-tests) auto_tests=true;;
         --datagrok) start=true core_only=true;;
         -jkg|--jupyter-kernel-gateway) start=true jkg=true;;
         -jn|--jupyter_notebook) start=true jupyter_notebook=true;;
@@ -515,6 +515,11 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
+if [[ $auto_tests == true ]]; then 
+    start=true
+    browser=false
+    datagrok_install
+fi
 
 if [[ "${versions["datagrok"]}" == "bleeding-edge" && $start == true || $update == true ]]; then
     message "Version of all services changed to bleeding-edge"
@@ -558,7 +563,7 @@ if [[ $namespace == "" ]]; then
     namespace_gen="datagrok-${versions["datagrok"]//\"/}"
     namespace=${namespace_gen//./-}
 fi
-
+echo $start
 if [[ $start == true ]]; then
     command="start"
     deploy_helm \
