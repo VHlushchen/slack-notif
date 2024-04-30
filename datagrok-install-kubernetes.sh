@@ -147,13 +147,12 @@ function check_minikube() {
     else
         message "minikube is already installed"
     fi
-    if [[ $(minikube status -o json | jq -r .Host) != "Running" || $(minikube status -o json | jq -r .Host) != "Kubelet"  || $(minikube status -o json | jq -r .Host) != "APIServer" ]]; then
-
+    if [[ $(minikube status -o json | jq -r .Host) != "Running" || $(minikube status -o json | jq -r .Kubelet) != "Running"  || $(minikube status -o json | jq -r .APIServer) != "Running" ]]; then
         message "Starting minikube..."
         /usr/local/bin/minikube start
+        echo "host.minikube.internal" | sudo tee -a /etc/hosts >/dev/null
     else
         message "minikube is already up and running"
-         sudo tee -a /etc/hosts >/dev/null
     fi
     message "Check context"
     if [ $(kubectl config current-context) != 'minikube' ]; then
@@ -169,7 +168,7 @@ function check_minikube() {
         minikube addons enable ingress
         kubectl get validatingwebhookconfigurations 
     fi
-    sleep 10
+    # sleep 10
 }
 
 function deploy_helm {
@@ -440,6 +439,7 @@ update=false
 delete=false
 purge=false
 browser=true
+auto_tests=false
 
 database_internal=true
 cvm_only=false
@@ -499,7 +499,7 @@ while [[ "$#" -gt 0 ]]; do
         --host) shift; host="$1";;
         --helm-version) shift; helm_version="$1";;
         --cvm) start=true, cvm_only=true;;
-        --auto-tests) start=true browser=false;;
+        --auto-tests) start=true browser=false datagrok_install;;
         --datagrok) start=true core_only=true;;
         -jkg|--jupyter-kernel-gateway) start=true jkg=true;;
         -jn|--jupyter_notebook) start=true jupyter_notebook=true;;
