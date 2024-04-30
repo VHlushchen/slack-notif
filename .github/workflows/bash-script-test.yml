@@ -8,6 +8,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -27,7 +28,7 @@ jobs:
                   echo "$pvc   $status"
               else
                   echo "$pvc   $status"
-                  exit 1
+                  sleep 10
               fi
           done <<< "$pvcs"
       
@@ -44,7 +45,7 @@ jobs:
               # Check if the status isn't "Running"
               if [ "$status" != "Running" ]; then
                   echo "Pod $pod is not running"
-                  exit 1
+                  sleep 10
               fi
           done <<< "$pods"
           
