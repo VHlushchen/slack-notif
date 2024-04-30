@@ -499,7 +499,7 @@ while [[ "$#" -gt 0 ]]; do
         --host) shift; host="$1";;
         --helm-version) shift; helm_version="$1";;
         --cvm) start=true, cvm_only=true;;
-        --auto-tests) browser=false;;
+        --auto-tests) start=true browser=false;;
         --datagrok) start=true core_only=true;;
         -jkg|--jupyter-kernel-gateway) start=true jkg=true;;
         -jn|--jupyter_notebook) start=true jupyter_notebook=true;;
