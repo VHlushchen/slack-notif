@@ -218,12 +218,10 @@ function deploy_helm {
             else
                 helm repo add $helm_repo https://vhlushchen.github.io/slack-notif/charts/
             fi
-            # helm install datagrok -n $namespace datagrok-test/datagrok-test \
             if [[ $(helm list -n $namespace -o json | jq -r .[].name) == $helm_deployment_name ]]; then
                 message "$helm_deployment_name is already deployed on the cluster. Run the <./datagrok-install-kubernetes.sh update> to update the datagrok"
             fi
-            echo $datagrok_version
-            helm upgrade --install $helm_deployment_name datagrok-helm-chart -n $namespace -f datagrok-helm-chart/values.yaml \
+            helm install datagrok -n $namespace datagrok-test/datagrok-test \
             --version $helm_version \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
@@ -245,8 +243,7 @@ function deploy_helm {
             fi
         fi
         if [ $command == "update" ]; then
-            # helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
-            helm upgrade $helm_deployment_name datagrok-helm-chart -n $namespace -f datagrok-helm-chart/values.yaml \
+            helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
             --version $helm_version  \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
@@ -274,12 +271,10 @@ function deploy_helm {
             else
                 helm repo add $helm_repo https://vhlushchen.github.io/slack-notif/charts/
             fi
-            # helm install datagrok -n $namespace datagrok-test/datagrok-test \
             if [[ $(helm list -n $namespace -o json | jq -r .[].name) == $helm_deployment_name ]]; then
                 message "$helm_deployment_name is already deployed on the cluster. Run the <./datagrok-install-kubernetes.sh update> to update the datagrok"
             fi
-            echo "inside $db"
-            helm upgrade --install $helm_deployment_name datagrok-helm-chart -n $namespace -f datagrok-helm-chart/values.yaml \
+            helm install datagrok -n $namespace datagrok-test/datagrok-test \
             --version $helm_version \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
@@ -314,8 +309,7 @@ function deploy_helm {
             fi
         fi
         if [ $command == "update" ]; then
-            # helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
-            helm upgrade $helm_deployment_name datagrok-helm-chart -n $namespace -f datagrok-helm-chart/values.yaml \
+            helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
             --version $helm_version  \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
