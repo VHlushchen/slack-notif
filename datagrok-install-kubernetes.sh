@@ -201,6 +201,7 @@ function deploy_helm {
     local dbAdminPassword=${21}             #database_admin_password
     local dbLogin=${22}                     #database_datagrok_username
     local dbPassword=${23}                  #database_datagrok_password
+    local browser=${24}
                                     
     if [[ $cvm_only == false && $core_only == false && $jkg == false && $h2o == false && $jupyter_notebook == false && $grok_compute == false ]]; then
         cvm_only=true
@@ -347,20 +348,22 @@ function deploy_helm {
         message "ingress status"
         kubectl get ingress -n $namespace
     fi
-    message "Waiting while the Datagrok server is starting"
-    echo "When the browser opens, use the following credentials to log in:"
-    echo "------------------------------"
-    echo -ne "${GREEN}"
-    echo "Login:    admin"
-    echo "Password: admin"
-    echo -ne "${RESET}"
-    echo "------------------------------"
-    echo "If you see the message 'Datagrok server is unavaliable' just wait for a while and reload the web page "
-    count_down ${timeout}
-    message "Running browser"
-    xdg-open http://${datagrok_version//./-}.datagrok.internal 
-    message "If the browser hasn't open, use the following link: http://${datagrok_version//./-}.datagrok.internal" 
-    message "To extend Datagrok fucntionality, install extension packages on the 'Manage -> Packages' page"
+    if [[ $browser == true ]]; then
+        message "Waiting while the Datagrok server is starting"
+        echo "When the browser opens, use the following credentials to log in:"
+        echo "------------------------------"
+        echo -ne "${GREEN}"
+        echo "Login:    admin"
+        echo "Password: admin"
+        echo -ne "${RESET}"
+        echo "------------------------------"
+        echo "If you see the message 'Datagrok server is unavaliable' just wait for a while and reload the web page "
+        count_down ${timeout}
+        message "Running browser"
+        xdg-open http://${datagrok_version//./-}.datagrok.internal 
+        message "If the browser hasn't open, use the following link: http://${datagrok_version//./-}.datagrok.internal" 
+        message "To extend Datagrok fucntionality, install extension packages on the 'Manage -> Packages' page"
+    fi
   
 }
 function check_helm() {
@@ -436,7 +439,7 @@ start=false
 update=false
 delete=false
 purge=false
-
+browser=true
 
 database_internal=true
 cvm_only=false
@@ -495,7 +498,8 @@ while [[ "$#" -gt 0 ]]; do
         -v|--datagrok-version) shift; start=true versions["datagrok"]="$1";;
         --host) shift; host="$1";;
         --helm-version) shift; helm_version="$1";;
-        --cvm) start=true, cvm_only=true,;;
+        --cvm) start=true, cvm_only=true;;
+        --auto-tests) browser=false;;
         --datagrok) start=true core_only=true;;
         -jkg|--jupyter-kernel-gateway) start=true jkg=true;;
         -jn|--jupyter_notebook) start=true jupyter_notebook=true;;
@@ -580,7 +584,8 @@ if [[ $start == true ]]; then
     ${db_creds["database_admin_username"]//\"/} \
     ${db_creds["database_admin_password"]//\"/} \
     ${db_creds["database_datagrok_username"]//\"/} \
-    ${db_creds["database_datagrok_password"]//\"/} 
+    ${db_creds["database_datagrok_password"]//\"/} \
+    $browser
     
 fi
 
@@ -608,7 +613,8 @@ if [[ $update == true ]]; then
     ${db_creds["database_admin_username"]//\"/} \
     ${db_creds["database_admin_password"]//\"/} \
     ${db_creds["database_datagrok_username"]//\"/} \
-    ${db_creds["database_datagrok_password"]//\"/} 
+    ${db_creds["database_datagrok_password"]//\"/} \
+    $browser
 fi
 if [[ $delete == true ]]; then
     datagrok_delete $namespace

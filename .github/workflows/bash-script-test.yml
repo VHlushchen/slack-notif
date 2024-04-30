@@ -12,4 +12,54 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: default run
-        run: ./datagrok-install-kubernetes.sh
+        run: ./datagrok-install-kubernetes.sh --auto-tests
+      - name: check status PVCs
+        run: |
+          namespace="datagrok-latest"
+          pvcs=$(kubectl get pvc -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
+
+          # Loop through each PVC and print its name and status
+          echo "PVC Name   Status"
+          echo "--------------------"
+          while IFS=$'\t' read -r pvc status; do
+              
+              if [[ $status == 'Bound' ]]; then
+                  echo "$pvc   $status"
+              else
+                  echo "$pvc   $status"
+                  exit 1
+              fi
+          done <<< "$pvcs"
+      
+      - name: check Status of pods
+        run: |
+          namespace="datagrok-latest"
+
+          # Get the list of pods in the specified namespace
+          pods=$(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
+          
+          # Loop through each pod
+          while IFS=$'\t' read -r pod status; do
+              echo "$pod   $status"
+              # Check if the status isn't "Running"
+              if [ "$status" != "Running" ]; then
+                  echo "Pod $pod is not running"
+                  exit 1
+              fi
+          done <<< "$pods"
+          
+          # If all pods are running, exit with code 0
+          exit 0
+      - name: check datagrok endpoint
+        run: |
+          url='latest.datagrok.internal'
+          response=$(curl -s -I "$url")
+
+          # Check if the response contains "HTTP/1.1 200 OK"
+          if [[ $response == *"HTTP/1.1 200 OK"* ]]; then
+              echo "The URL $url returned a 200 status code."
+              exit 0
+          else
+              echo "The URL $url did not return a 200 status code."
+              exit 1
+          fi
