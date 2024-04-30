@@ -178,20 +178,27 @@ check_any_pod_not_running() {
     local namespace=$1
     while read -r pod status; do
         if [[ "$status" != "Running" ]]; then
+            echo $pod $status
             return 0
         fi
     done < <(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.phase}{"\n"}{end}')
     return 1
 }
+check_any_pod_not_ready() {
+    local namespace=$1
+    while read -r pod ready; do
+        if [[ "$ready" != "True" ]]; then
+            echo $pod $ready
+            return 0
+        fi
+    done < <(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[?(@.type=="Ready")]}{.status}{"\n"}{end}')
+    return 1
+}
 
 function deploy_helm {
-    timeout=60
     datagrok_local_url="http://datagrok.datagrok.internal"
     helm_repo="datagrok-test"
     helm_deployment_name="datagrok"
-    timeout_deploy=300
-    start_time=$(date +%s)
-
 
     local namespace="${1}"
     local cvm_only="$2"
@@ -207,17 +214,19 @@ function deploy_helm {
     local grok_connect_version=${12}        #versions["grok_connect"]
     local jupyter_notebook_version="${13}"  #versions["jupyter_notebook"]
     local grok_compute_version=${14}        #versions["grok_compute"]
-    local helm_version=${15}    
-    local database_internal=${16}
-    local dbServer=${17}                    #database_host
-    local dbPort=${18}                      #database_port
-    local db=${19}                          #database_name    
-    local dbAdminLogin=${20}                #database_admin_username
-    local dbAdminPassword=${21}             #database_admin_password
-    local dbLogin=${22}                     #database_datagrok_username
-    local dbPassword=${23}                  #database_datagrok_password
-    local browser=${24}
-                                    
+    local browser=${15}
+    local helm_version=${16}    
+    local database_internal=${17}
+    local dbServer=${18}                    #database_host
+    local dbPort=${19}                      #database_port
+    local db=${20}                          #database_name    
+    local dbAdminLogin=${21}                #database_admin_username
+    local dbAdminPassword=${22}             #database_admin_password
+    local dbLogin=${23}                     #database_datagrok_username
+    local dbPassword=${24}                  #database_datagrok_password
+      
+
+    echo "browsers ${namespace}"
     if [[ $cvm_only == false && $core_only == false && $jkg == false && $h2o == false && $jupyter_notebook == false && $grok_compute == false ]]; then
         cvm_only=true
         core_only=true
@@ -232,14 +241,15 @@ function deploy_helm {
             fi
             if [[ $(helm repo list -o json | jq --raw-output .[].name | grep $helm_repo) == $helm_repo ]]; then
                 message "$helm_repo already exists with the same configuration, skipping"
+                helm repo update $helm_repo
             else
                 helm repo add $helm_repo https://vhlushchen.github.io/slack-notif/charts/
             fi
             if [[ $(helm list -n $namespace -o json | jq -r .[].name) == $helm_deployment_name ]]; then
                 message "$helm_deployment_name is already deployed on the cluster. Run the <./datagrok-install-kubernetes.sh update> to update the datagrok"
             fi
-            helm install datagrok -n $namespace datagrok-test/datagrok-test \
-            --version $helm_version \
+            #helm install datagrok -n $namespace datagrok-test/datagrok-test \
+            helm install datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
             --set cvm.jkg.enabled=$jkg \
@@ -258,10 +268,39 @@ function deploy_helm {
             message "add ${datagrok_version//./-}.datagrok.internal to hosts"
             echo "$(minikube ip) ${datagrok_version//./-}.datagrok.internal"| sudo tee -a /etc/hosts >/dev/null
             fi
+            pvcs=$(kubectl get pvc -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
+
+            # Loop through each PVC and print its name and status
+            echo "PVC Name   Status"
+            echo "--------------------"
+            while IFS=$'\t' read -r pvc status; do
+                if [[ $pvc == 'datagrok-cfg' || $pvc == 'datagrok-data' || $pvc == 'db-data-datagrok-db-0' ]]; then
+                    if [[ $status == 'Bound' ]]; then
+                        echo "$pvc   $status"
+                    else
+                        echo "$pvc   $status"
+                        exit 1
+                    fi
+                else
+                    helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+                    --set cvm.enabled=$cvm_only \
+                    --set core.enabled=$core_only \
+                    --set cvm.jkg.enabled=$jkg \
+                    --set cvm.h2o.enabled=$h2o \
+                    --set cvm.jupyter_notebook.enabled=$jupyter_notebook \
+                    --set cvm.grok_compute.enabled=$grok_compute \
+                    --set core.datagrok.container.tag=$datagrok_version \
+                    --set core.grok_connect.container.tag=$grok_connect_version \
+                    --set cvm.jkg.container.tag=$jkg_version \
+                    --set cvm.jupyter_notebook.container.tag=$jupyter_notebook_version \
+                    --set cvm.grok_compute.container.tag=$grok_compute_version \
+                    --set cvm.h2o.container.tag=$h2o_version
+                fi
+            done <<< "$pvcs"
         fi
         if [ $command == "update" ]; then
-            helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
-            --version $helm_version  \
+            #helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
+            helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
             --set cvm.jkg.enabled=$jkg \
@@ -276,7 +315,7 @@ function deploy_helm {
             --set cvm.h2o.container.tag=$h2o_version
         fi
     else
-        if [ $command == "start" ]; then
+        if [[ $command == "start" ]]; then
             if kubectl get namespace $namespace &> /dev/null; then
                 message "Namespace $namespace exists."
             else
@@ -285,14 +324,15 @@ function deploy_helm {
             fi
             if [[ $(helm repo list -o json | jq --raw-output .[].name | grep $helm_repo) == $helm_repo ]]; then
                 message "$helm_repo already exists with the same configuration, skipping"
+                helm repo update
             else
                 helm repo add $helm_repo https://vhlushchen.github.io/slack-notif/charts/
             fi
             if [[ $(helm list -n $namespace -o json | jq -r .[].name) == $helm_deployment_name ]]; then
                 message "$helm_deployment_name is already deployed on the cluster. Run the <./datagrok-install-kubernetes.sh update> to update the datagrok"
             fi
-            helm install datagrok -n $namespace datagrok-test/datagrok-test \
-            --version $helm_version \
+            #helm install datagrok -n $namespace datagrok-test/datagrok-test \
+            helm install datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
             --set cvm.jkg.enabled=$jkg \
@@ -324,10 +364,39 @@ function deploy_helm {
             message "add ${datagrok_version//./-}.datagrok.internal to hosts"
             echo "$(minikube ip) ${datagrok_version//./-}.datagrok.internal"| sudo tee -a /etc/hosts >/dev/null
             fi
+            pvcs=$(kubectl get pvc -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
+
+            # Loop through each PVC and print its name and status
+            echo "PVC Name   Status"
+            echo "--------------------"
+            while IFS=$'\t' read -r pvc status; do
+                if [[ $pvc == 'datagrok-cfg' || $pvc == 'datagrok-data' || $pvc == 'db-data-datagrok-db-0' ]]; then
+                    if [[ $status == 'Bound' ]]; then
+                        echo "$pvc   $status"
+                    else
+                        echo "$pvc   $status"
+                        exit 1
+                    fi
+                else
+                    helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+                    --set cvm.enabled=$cvm_only \
+                    --set core.enabled=$core_only \
+                    --set cvm.jkg.enabled=$jkg \
+                    --set cvm.h2o.enabled=$h2o \
+                    --set cvm.jupyter_notebook.enabled=$jupyter_notebook \
+                    --set cvm.grok_compute.enabled=$grok_compute \
+                    --set core.datagrok.container.tag=$datagrok_version \
+                    --set core.grok_connect.container.tag=$grok_connect_version \
+                    --set cvm.jkg.container.tag=$jkg_version \
+                    --set cvm.jupyter_notebook.container.tag=$jupyter_notebook_version \
+                    --set cvm.grok_compute.container.tag=$grok_compute_version \
+                    --set cvm.h2o.container.tag=$h2o_version
+                fi
+            done <<< "$pvcs"
         fi
-        if [ $command == "update" ]; then
-            helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
-            --version $helm_version  \
+        if [[ $command == "update" ]]; then
+            #helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
+            helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
             --set cvm.jkg.enabled=$jkg \
@@ -354,16 +423,39 @@ function deploy_helm {
             --set cvm.jkg.grok_parameters.dbPassword=$dbPassword
         fi
     fi
+    
+    start_time_running_state=$(date +%s)
+    timeout_running_state=300
+    
+    
     while check_any_pod_not_running $namespace; do
         current_time=$(date +%s)
-        elapsed_time=$((current_time - start_time))
-        if (( elapsed_time >= timeout )); then
+        elapsed_time=$((current_time - start_time_running_state))
+        if (( elapsed_time >= timeout_running_state )); then
             echo "Timeout reached. Not all pods are running."
             exit 1
         fi
         echo "Not all pods are running. Waiting..."
         sleep 10  # Adjust the delay as needed
     done
+    
+    start_time_ready_state=$(date +%s)
+    timeout_ready_state=120
+    
+    while check_any_pod_not_ready $namespace; do
+    current_time=$(date +%s)
+    elapsed_time=$((current_time - start_time_ready_state))
+    if (( elapsed_time >= timeout_ready_state )); then
+        message "Timeout reached. Not all pods are ready."
+        exit 1
+    fi
+        echo "Not all pods are ready. Waiting..."
+        sleep 10  # Adjust the delay as needed
+    done
+
+    message "All pods are ready!"
+
+  
 
     message "All pods are running!"
     kubectl get pods -n $namespace
@@ -373,21 +465,30 @@ function deploy_helm {
         message "ingress status"
         kubectl get ingress -n $namespace
     fi
+    echo "browser $browser"
     if [[ $browser == true ]]; then
-        message "Waiting while the Datagrok server is starting"
-        echo "When the browser opens, use the following credentials to log in:"
-        echo "------------------------------"
-        echo -ne "${GREEN}"
-        echo "Login:    admin"
-        echo "Password: admin"
-        echo -ne "${RESET}"
-        echo "------------------------------"
-        echo "If you see the message 'Datagrok server is unavaliable' just wait for a while and reload the web page "
-        count_down ${timeout}
-        message "Running browser"
-        xdg-open http://${datagrok_version//./-}.datagrok.internal 
-        message "If the browser hasn't open, use the following link: http://${datagrok_version//./-}.datagrok.internal" 
-        message "To extend Datagrok fucntionality, install extension packages on the 'Manage -> Packages' page"
+        url="http://${datagrok_version//./-}.datagrok.internal"
+        response=$(curl -s -I "$url")
+        timeout=10
+
+# Check if the response contains "HTTP/1.1 200 OK"
+        if [[ $response == *"HTTP/1.1 200 OK"* ]]; then
+            echo "The URL $url returned a 200 status code."
+            message "Waiting while the Datagrok server is starting"
+            echo "When the browser opens, use the following credentials to log in:"
+            echo "------------------------------"
+            echo -ne "${GREEN}"
+            echo "Login:    admin"
+            echo "Password: admin"
+            echo -ne "${RESET}"
+            echo "------------------------------"
+            echo "If you see the message 'Datagrok server is unavaliable' just wait for a while and reload the web page "
+            count_down ${timeout}
+            message "Running browser"
+            xdg-open $url
+            message "If the browser hasn't open, use the following link: $url" 
+            message "To extend Datagrok fucntionality, install extension packages on the 'Manage -> Packages' page"
+        fi
     fi
   
 }
@@ -452,7 +553,7 @@ function datagrok_install {
 
 # === Main part of the script starts from here ===
 
-helm_version="1.0.1"
+helm_version="1.0.2"
 namespace=""
 host=""
 
@@ -499,12 +600,10 @@ declare -A db_creds=(
     ["database_datagrok_username"]="" 
     ["database_datagrok_password"]="" 
     )
-
 if [[ "$#" -eq 0 ]]; then
     datagrok_install
     start=true
 fi
-
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         install) datagrok_install ;;
@@ -521,7 +620,7 @@ while [[ "$#" -gt 0 ]]; do
         -gc-v|--grok-compute-version) shift; versions["grok_compute"]="$1";;
         -gn-v|--grok-connect-version) shift; versions["grok_connect"]="$1";;
         -jn-v|--jupyter-notebook-version) shift; versions["jupyter_notebook"]="$1";;
-        -v|--datagrok-version) shift; start=true versions["datagrok"]="$1";;
+        -v|--datagrok-version) shift; versions["datagrok"]="$1";;
         --host) shift; host="$1";;
         --helm-version) shift; helm_version="$1";;
         --cvm) start=true, cvm_only=true;;
@@ -541,13 +640,17 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-if [[ $auto_tests == true ]]; then 
+if [[ $auto_tests == true && ($update == false || $start == true) ]]; then 
     start=true
     browser=false
     datagrok_install
 fi
+if [[ $auto_tests == true && $update == true ]]; then
+    update=true
+    browser=false
+fi
 
-if [[ "${versions["datagrok"]}" == "bleeding-edge" && $start == true || $update == true ]]; then
+if [[ "${versions["datagrok"]}" == "bleeding-edge" && ($start == true || $update == true) ]]; then
     message "Version of all services changed to bleeding-edge"
     versions=(
         ["datagrok"]="bleeding-edge"
@@ -589,7 +692,6 @@ if [[ $namespace == "" ]]; then
     namespace_gen="datagrok-${versions["datagrok"]//\"/}"
     namespace=${namespace_gen//./-}
 fi
-echo $start
 if [[ $start == true ]]; then
     command="start"
     deploy_helm \
@@ -607,6 +709,7 @@ if [[ $start == true ]]; then
     ${versions["grok_connect"]//\"/} \
     ${versions["jupyter_notebook"]//\"/} \
     ${versions["grok_compute"]//\"/} \
+    $browser \
     $helm_version \
     $database_internal \
     ${db_creds["database_host"]//\"/} \
@@ -615,13 +718,13 @@ if [[ $start == true ]]; then
     ${db_creds["database_admin_username"]//\"/} \
     ${db_creds["database_admin_password"]//\"/} \
     ${db_creds["database_datagrok_username"]//\"/} \
-    ${db_creds["database_datagrok_password"]//\"/} \
-    $browser
+    ${db_creds["database_datagrok_password"]//\"/} 
     
 fi
-
 if [[ $update == true ]]; then
+    echo $browser
     command="update"
+    deploy_helm \
     $namespace \
     $cvm_only \
     $core_only \
@@ -636,6 +739,7 @@ if [[ $update == true ]]; then
     ${versions["grok_connect"]//\"/} \
     ${versions["jupyter_notebook"]//\"/} \
     ${versions["grok_compute"]//\"/} \
+    $browser \
     $helm_version \
     $database_internal \
     ${db_creds["database_host"]//\"/} \
@@ -644,8 +748,7 @@ if [[ $update == true ]]; then
     ${db_creds["database_admin_username"]//\"/} \
     ${db_creds["database_admin_password"]//\"/} \
     ${db_creds["database_datagrok_username"]//\"/} \
-    ${db_creds["database_datagrok_password"]//\"/} \
-    $browser
+    ${db_creds["database_datagrok_password"]//\"/} 
 fi
 if [[ $delete == true ]]; then
     datagrok_delete $namespace

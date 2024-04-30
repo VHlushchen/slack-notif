@@ -37,7 +37,7 @@ spec:
         - envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-grok-parameters-configmap             
-          image: datagrok/datagrok:1.18.3
+          image: {{ .Values.core.datagrok.container.image }}:{{ .Values.core.datagrok.container.tag }}
           imagePullPolicy: Always
           name: datagrok
           ports:
