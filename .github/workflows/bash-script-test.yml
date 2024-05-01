@@ -39,11 +39,11 @@ jobs:
       - name: custom namespace deployment
         run: |
           ./datagrok-install-kubernetes.sh delete --auto-tests 
-          ./datagrok-install-kubernetes.sh -n auto-tests --auto-tests
+          ./datagrok-install-kubernetes.sh -n auto-tests --datagrok --auto-tests
       - name: Bleeding-edge deployment
-      #   run: ./datagrok-install-kubernetes.sh --bleeding-edge --auto-tests
-      # - name: custom version deployment
-        run: ./datagrok-install-kubernetes.sh --datagrok -v 1.18.3  
+        run: ./datagrok-install-kubernetes.sh start --datagrok --bleeding-edge --auto-tests
+      - name: custom version deployment
+        run: ./datagrok-install-kubernetes.sh start --datagrok -v 1.18.3  
       - name: delete deployment
         run: ./datagrok-install-kubernetes.sh delete
       # - name: run without flags
