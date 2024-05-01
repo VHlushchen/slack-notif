@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Pulling datagrok/datagrok images
         run: |
-          docker pull datagrok/datagrok:latest & docker pull datagrok/datagrok:bleeding-edge & docker pull datagrok/datagrok:1.18.3
+          docker pull datagrok/datagrok:latest 
       
       - name: Pulling datagrok/grok-connect images
         run: |
@@ -33,11 +33,16 @@ jobs:
       - name: Pulling datagrok/h2o images
         run: |
           docker pull datagrok/h2o:latest & docker pull datagrok/h2o:bleeding-edge
+      - name: Pulling datagrok/grok_compute images
+        run: |
+          docker pull datagrok/grok_compute:latest & docker pull datagrok/h2o:bleeding-edge
       # - name: Pulling datagrok/jupyter_kernel_gateway images
       #   run: |
       #     docker pull datagrok/jupyter_kernel_gateway:latest & docker pull datagrok/jupyter_kernel_gateway:bleeding-edge
       - name: datagrok deployment only
-        run: ./datagrok-install-kubernetes.sh --datagrok --auto-tests
+        run: |
+          ./datagrok-install-kubernetes.sh --datagrok --auto-tests
+          ./datagrok-install-kubernetes.sh
       # - name: CVM deployment only
       #   run: ./datagrok-install-kubernetes.sh update --cvm --auto-tests
       # - name: JKG deployment only
@@ -51,11 +56,17 @@ jobs:
           ./datagrok-install-kubernetes.sh delete --auto-tests 
           ./datagrok-install-kubernetes.sh -n auto-tests --datagrok --auto-tests
       - name: Bleeding-edge deployment
-        run: ./datagrok-install-kubernetes.sh start --datagrok --bleeding-edge --auto-tests
+        run: |
+          docker pull datagrok/datagrok:bleeding-edge & docker pull datagrok/grok_connect:bleeding-edge
+          ./datagrok-install-kubernetes.sh start --datagrok --bleeding-edge --auto-tests
+          ./datagrok-install-kubernetes.sh delete --bleeding-edge
+          docker rmi datagrok/datagrok:bleeding-edge & docker rmi datagrok/grok_connect:bleeding-edge
       - name: custom version deployment
-        run: ./datagrok-install-kubernetes.sh start --datagrok -v 1.18.3  
-      - name: delete deployment
-        run: ./datagrok-install-kubernetes.sh delete
+        run: |
+          docker pull datagrok/datagrok:1.18.3
+          ./datagrok-install-kubernetes.sh start --datagrok -v 1.18.3
+          ./datagrok-install-kubernetes.sh delete -v 1.18.3
+          docker rmi datagrok/datagrok:1.18.3 
       - name: Generation config-file
         run: |
           echo '{
