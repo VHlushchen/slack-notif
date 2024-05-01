@@ -461,16 +461,19 @@ function deploy_helm {
     kubectl get pods -n $namespace
     message "services status"
     kubectl get svc -n $namespace
+    url="http://${datagrok_version//./-}.datagrok.internal"
     if [[ $core_only == true ]]; then
         message "ingress status"
         kubectl get ingress -n $namespace
+        response=$(curl -s -I "$url")
+        if [[ $response == *"HTTP/1.1 200 OK"* ]]; then
+            echo "The URL $url returned a 200 status code."
+        fi
     fi
-    url="http://${datagrok_version//./-}.datagrok.internal"
-    response=$(curl -s -I "$url")
     
-    if [[ $response == *"HTTP/1.1 200 OK"* ]]; then
-        echo "The URL $url returned a 200 status code."
-    fi
+    
+    
+    
     if [[ $browser == true ]]; then
         timeout=10
         echo "When the browser opens, use the following credentials to log in:"
