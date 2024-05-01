@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04-large
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout Repository
@@ -18,7 +18,7 @@ jobs:
       
       - name: Pulling datagrok/grok-connect images
         run: |
-          docker pull datagrok/grok-connect:latest & docker pull datagrok/grok-connect:bleeding-edge
+          docker pull datagrok/grok_connect & docker pull datagrok/grok_connect:bleeding-edge
 
       - name: Pulling datagrok/h2o images
         run: |
