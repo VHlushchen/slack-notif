@@ -54,6 +54,7 @@ jobs:
         run: |
           ./datagrok-install-kubernetes.sh delete --auto-tests 
           ./datagrok-install-kubernetes.sh -n auto-tests --datagrok --auto-tests
+          ./datagrok-install-kubernetes.sh delete -n auto-tests --datagrok --auto-tests
       - name: Bleeding-edge deployment
         run: |
           docker pull datagrok/datagrok:bleeding-edge & docker pull datagrok/grok_connect:bleeding-edge
