@@ -35,7 +35,7 @@ jobs:
       - name: h20 deployment only
         run: ./datagrok-install-kubernetes.sh update -h2o --auto-tests
       - name: grok compute deploymeny only
-        run: ./datagrok-install-kubernetes.sh -gc --auto-tests
+        run: ./datagrok-install-kubernetes.sh update -gc --auto-tests
       - name: custom namespace deployment
         run: |
           ./datagrok-install-kubernetes.sh delete --auto-tests 

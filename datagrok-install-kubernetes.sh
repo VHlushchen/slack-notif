@@ -224,7 +224,6 @@ function deploy_helm {
     local dbLogin=${23}                     #database_datagrok_username
     local dbPassword=${24}                  #database_datagrok_password
       
-    echo "jkg $jkg"
     if [[ $cvm_only == false && $core_only == false && $jkg == false && $h2o == false && $jupyter_notebook == false && $grok_compute == false ]]; then
         cvm_only=true
         core_only=true
