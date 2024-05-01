@@ -187,7 +187,6 @@ check_any_pod_not_ready() {
     local namespace=$1
     while read -r pod ready; do
         if [[ "$ready" != "True" ]]; then
-            echo $pod $ready
             return 0
         fi
     done < <(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[?(@.type=="Ready")]}{.status}{"\n"}{end}')
@@ -448,7 +447,8 @@ function deploy_helm {
         message "Timeout reached. Not all pods are ready."
         exit 1
     fi
-        echo "Not all pods are ready. Waiting..."
+        message "Not all pods are ready. Waiting..."
+        kubectl get pods -n $namespace
         sleep 10  # Adjust the delay as needed
     done
 
