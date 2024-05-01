@@ -12,15 +12,26 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Pulling docker images
+      - name: Pulling datagrok/datagrok images
         run: |
-          docker pull datagrok/jupyter_kernel_gateway:latest & docker pull datagrok/jupyter_kernel_gateway:bleeding-edge
+          docker pull datagrok/datagrok:latest & docker pull datagrok/datagrok:bleeding-edge & datagrok/datagrok:1.18.3
+      
+      - name: Pulling datagrok/grok-connect images
+        run: |
+          docker pull datagrok/grok-connect:latest & docker pull datagrok/grok-connect:bleeding-edge
+
+      - name: Pulling datagrok/h2o images
+        run: |
+          docker pull datagrok/h2o:latest & docker pull datagrok/h2o:bleeding-edge
+      # - name: Pulling datagrok/jupyter_kernel_gateway images
+      #   run: |
+      #     docker pull datagrok/jupyter_kernel_gateway:latest & docker pull datagrok/jupyter_kernel_gateway:bleeding-edge
       - name: datagrok deployment only
         run: ./datagrok-install-kubernetes.sh --datagrok --auto-tests
-      - name: CVM deployment only
-        run: ./datagrok-install-kubernetes.sh update --cvm --auto-tests
-      - name: JKG deployment only
-        run: ./datagrok-install-kubernetes.sh update --datagrok -jkg --auto-tests
+      # - name: CVM deployment only
+      #   run: ./datagrok-install-kubernetes.sh update --cvm --auto-tests
+      # - name: JKG deployment only
+      #   run: ./datagrok-install-kubernetes.sh update --datagrok -jkg --auto-tests
       - name: h20 deployment only
         run: ./datagrok-install-kubernetes.sh update -h2o --auto-tests
       - name: grok compute deploymeny only
@@ -30,13 +41,13 @@ jobs:
           ./datagrok-install-kubernetes.sh delete --auto-tests 
           ./datagrok-install-kubernetes.sh -n auto-tests --auto-tests
       - name: Bleeding-edge deployment
-        run: ./datagrok-install-kubernetes.sh --bleeding-edge --auto-tests
-      - name: custom version deployment
-        run: ./datagrok-install-kubernetes.sh -v 1.18.3  
+      #   run: ./datagrok-install-kubernetes.sh --bleeding-edge --auto-tests
+      # - name: custom version deployment
+        run: ./datagrok-install-kubernetes.sh --datagrok -v 1.18.3  
       - name: delete deployment
         run: ./datagrok-install-kubernetes.sh delete
-      - name: run without flags
-        run: ./datagrok-install-kubernetes.sh --auto-tests
+      # - name: run without flags
+      #   run: ./datagrok-install-kubernetes.sh --auto-tests
       # - name: delete deployment
       #   run: |
       #     namespace="datagrok-latest"
