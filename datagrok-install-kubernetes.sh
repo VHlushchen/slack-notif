@@ -178,7 +178,6 @@ check_any_pod_not_running() {
     local namespace=$1
     while read -r pod status; do
         if [[ "$status" != "Running" ]]; then
-            echo $pod $status
             return 0
         fi
     done < <(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.phase}{"\n"}{end}')
@@ -226,7 +225,6 @@ function deploy_helm {
     local dbPassword=${24}                  #database_datagrok_password
       
 
-    echo "jkg version ${jkg_version}"
     if [[ $cvm_only == false && $core_only == false && $jkg == false && $h2o == false && $jupyter_notebook == false && $grok_compute == false ]]; then
         cvm_only=true
         core_only=true
@@ -440,7 +438,7 @@ function deploy_helm {
         kubectl get pods -n $namespace
         sleep 10  # Adjust the delay as needed
     done
-    
+    message "All pods are running!"
     start_time_ready_state=$(date +%s)
     timeout_ready_state=120
     
@@ -457,10 +455,6 @@ function deploy_helm {
 
     message "All pods are ready!"
 
-  
-
-    message "All pods are running!"
-    kubectl get pods -n $namespace
     message "services status"
     kubectl get svc -n $namespace
     url="http://${datagrok_version//./-}.datagrok.internal"
@@ -633,23 +627,21 @@ while [[ "$#" -gt 0 ]]; do
         -jn|--jupyter_notebook) jupyter_notebook=true;;
         -gc|--grok_compute) grok_compute=true;;
         -h2o|--h2o) h2o=true;;
-        *) echo "Unknown parameter passed: $1"; exit 1;;
+        *) message "Unknown parameter passed: $1" && Help; exit 1;;
         # purge) datagrok_purge ;;
-        help | "-h" | "--help")
+        help | "--help")
             echo "usage: $script_name install|start|stop|update|reset|purge" >&2
             exit 1
             ;;
     esac
     shift
 done
-echo "before  $start"
 if [[ $auto_tests == true && $update == false ]]; then 
     echo "inside $start"
     start=true
     browser=false
     datagrok_install
 fi
-echo $start
 if [[ $auto_tests == true && $update == true ]]; then
     update=true
     browser=false
@@ -728,7 +720,6 @@ if [[ $start == true ]]; then
 fi
 
 if [[ $update == true ]]; then
-    echo $browser
     command="update"
     deploy_helm \
     $namespace \

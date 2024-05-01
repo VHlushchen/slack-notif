@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Pulling docker images
+        run: |
+          docker pull datagrok/jupyter_kernel_gateway:latest & docker pull datagrok/jupyter_kernel_gateway:bleeding-edge
       - name: datagrok deployment only
         run: ./datagrok-install-kubernetes.sh --datagrok --auto-tests
       - name: CVM deployment only
