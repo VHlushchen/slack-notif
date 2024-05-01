@@ -635,7 +635,7 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
-if [[ $auto_tests == true && $update == false ]]; then 
+if [[ $auto_tests == true && $update == false && $delete == false ]]; then 
     echo "inside $start"
     start=true
     browser=false
