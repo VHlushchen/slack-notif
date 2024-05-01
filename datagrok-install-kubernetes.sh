@@ -373,8 +373,10 @@ function deploy_helm {
                     if [[ $status == 'Bound' ]]; then
                         echo "$pvc   $status"
                     else
-                        echo "$pvc   $status"
-                        sleep 10
+                        if [[ $status == 'Pending' ]]
+                            echo "$pvc   $status"
+                            sleep 20
+                        fi
                     fi
                 else
                     helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
