@@ -193,10 +193,12 @@ check_any_pod_not_ready() {
     return 1
 }
 
+
 function deploy_helm {
     datagrok_local_url="http://datagrok.datagrok.internal"
     helm_repo="datagrok-test"
     helm_deployment_name="datagrok"
+    pvcs_list=("datagrok-data" "datagrok-cfg" "db-data-datagrok-db-0")
 
     local namespace="${1}"
     local cvm_only="$2"
@@ -264,35 +266,37 @@ function deploy_helm {
             message "add ${datagrok_version//./-}.datagrok.internal to hosts"
             echo "$(minikube ip) ${datagrok_version//./-}.datagrok.internal"| sudo tee -a /etc/hosts >/dev/null
             fi
-            pvcs=$(kubectl get pvc -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
-
-            # Loop through each PVC and print its name and status
-            echo "PVC Name   Status"
-            echo "--------------------"
-            while IFS=$'\t' read -r pvc status; do
-                if [[ $pvc == 'datagrok-cfg' || $pvc == 'datagrok-data' || $pvc == 'db-data-datagrok-db-0' ]]; then
-                    if [[ $status == 'Bound' ]]; then
-                        echo "$pvc   $status"
-                    else
-                        echo "$pvc   $status"
-                        exit 1
-                    fi
+            message "NAMESPACE                     NAME                    STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE"
+            for pvc in "${pvcs_list[@]}"; do
+                if kubectl get pvc "$pvc" -n $namespace &>/dev/null; then
+                   kubectl get pvc "$pvc" -n $namespace | grep $pvc 
                 else
-                    helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
-                    --set cvm.enabled=$cvm_only \
-                    --set core.enabled=$core_only \
-                    --set cvm.jkg.enabled=$jkg \
-                    --set cvm.h2o.enabled=$h2o \
-                    --set cvm.jupyter_notebook.enabled=$jupyter_notebook \
-                    --set cvm.grok_compute.enabled=$grok_compute \
-                    --set core.datagrok.container.tag=$datagrok_version \
-                    --set core.grok_connect.container.tag=$grok_connect_version \
-                    --set cvm.jkg.container.tag=$jkg_version \
-                    --set cvm.jupyter_notebook.container.tag=$jupyter_notebook_version \
-                    --set cvm.grok_compute.container.tag=$grok_compute_version \
-                    --set cvm.h2o.container.tag=$h2o_version
+                    message "PVC $pvc does not exist."
+                    pvc_exist_status=false
+                    while [[ "$pvc_exist_status" != 'true' ]]; do
+                        sleep 15
+                        if kubectl get pvc "$pvc" -n $namespace &>/dev/null; then
+                            pvc_exist_status=true
+                        else
+                            message "PVC $pvc does not exist. Creating"
+                            helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+                            --set cvm.enabled=$cvm_only \
+                            --set core.enabled=$core_only \
+                            --set cvm.jkg.enabled=$jkg \
+                            --set cvm.h2o.enabled=$h2o \
+                            --set cvm.jupyter_notebook.enabled=$jupyter_notebook \
+                            --set cvm.grok_compute.enabled=$grok_compute \
+                            --set core.datagrok.container.tag=$datagrok_version \
+                            --set core.grok_connect.container.tag=$grok_connect_version \
+                            --set cvm.jkg.container.tag=$jkg_version \
+                            --set cvm.jupyter_notebook.container.tag=$jupyter_notebook_version \
+                            --set cvm.grok_compute.container.tag=$grok_compute_version \
+                            --set cvm.h2o.container.tag=$h2o_version
+                        fi
+                    done
+                    
                 fi
-            done <<< "$pvcs"
+            done
         fi
         if [ $command == "update" ]; then
             #helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
@@ -360,36 +364,37 @@ function deploy_helm {
             message "add ${datagrok_version//./-}.datagrok.internal to hosts"
             echo "$(minikube ip) ${datagrok_version//./-}.datagrok.internal"| sudo tee -a /etc/hosts >/dev/null
             fi
-            pvcs=$(kubectl get pvc -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
-            # Loop through each PVC and print its name and status
-            echo "PVC Name   Status"
-            echo "--------------------"
-            while IFS=$'\t' read -r pvc status; do
-                if [[ $pvc == 'datagrok-cfg' || $pvc == 'datagrok-data' || $pvc == 'db-data-datagrok-db-0' ]]; then
-                    if [[ $status == 'Bound' ]]; then
-                        echo "$pvc   $status"
-                    else
-                        if [[ $status == 'Pending' ]]; then
-                            echo "$pvc   $status"
-                            sleep 20
-                        fi
-                    fi
+            message "NAMESPACE                     NAME                    STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE"
+            for pvc in "${pvcs_list[@]}"; do
+                if kubectl get pvc "$pvc" -n $namespace &>/dev/null; then
+                   kubectl get pvc "$pvc" -n $namespace | grep $pvc 
                 else
-                    helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
-                    --set cvm.enabled=$cvm_only \
-                    --set core.enabled=$core_only \
-                    --set cvm.jkg.enabled=$jkg \
-                    --set cvm.h2o.enabled=$h2o \
-                    --set cvm.jupyter_notebook.enabled=$jupyter_notebook \
-                    --set cvm.grok_compute.enabled=$grok_compute \
-                    --set core.datagrok.container.tag=$datagrok_version \
-                    --set core.grok_connect.container.tag=$grok_connect_version \
-                    --set cvm.jkg.container.tag=$jkg_version \
-                    --set cvm.jupyter_notebook.container.tag=$jupyter_notebook_version \
-                    --set cvm.grok_compute.container.tag=$grok_compute_version \
-                    --set cvm.h2o.container.tag=$h2o_version
+                    message "PVC $pvc does not exist."
+                    pvc_exist_status=false
+                    while [[ "$pvc_exist_status" != 'true' ]]; do
+                        sleep 15
+                        if kubectl get pvc "$pvc" -n $namespace &>/dev/null; then
+                            pvc_exist_status=true
+                        else
+                            message "PVC $pvc does not exist. Creating"
+                            helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+                            --set cvm.enabled=$cvm_only \
+                            --set core.enabled=$core_only \
+                            --set cvm.jkg.enabled=$jkg \
+                            --set cvm.h2o.enabled=$h2o \
+                            --set cvm.jupyter_notebook.enabled=$jupyter_notebook \
+                            --set cvm.grok_compute.enabled=$grok_compute \
+                            --set core.datagrok.container.tag=$datagrok_version \
+                            --set core.grok_connect.container.tag=$grok_connect_version \
+                            --set cvm.jkg.container.tag=$jkg_version \
+                            --set cvm.jupyter_notebook.container.tag=$jupyter_notebook_version \
+                            --set cvm.grok_compute.container.tag=$grok_compute_version \
+                            --set cvm.h2o.container.tag=$h2o_version
+                        fi
+                    done
+                    
                 fi
-            done <<< "$pvcs"
+            done
         fi
         if [[ $command == "update" ]]; then
             #helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \

@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  test:
+  test-start-update:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
