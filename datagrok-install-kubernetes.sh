@@ -436,6 +436,7 @@ function deploy_helm {
             exit 1
         fi
         echo "Not all pods are running. Waiting..."
+        kubectl get pods -n $namespace
         sleep 10  # Adjust the delay as needed
     done
     
