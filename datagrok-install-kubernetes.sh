@@ -365,7 +365,7 @@ function deploy_helm {
             echo "$(minikube ip) ${datagrok_version//./-}.datagrok.internal"| sudo tee -a /etc/hosts >/dev/null
             fi
             pvcs=$(kubectl get pvc -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
-
+            echo $pvcs
             # Loop through each PVC and print its name and status
             echo "PVC Name   Status"
             echo "--------------------"
