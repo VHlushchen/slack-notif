@@ -623,13 +623,13 @@ while [[ "$#" -gt 0 ]]; do
         -v|--datagrok-version) shift; versions["datagrok"]="$1";;
         --host) shift; host="$1";;
         --helm-version) shift; helm_version="$1";;
-        --cvm) start=true, cvm_only=true;;
+        --cvm) cvm_only=true;;
         --auto-tests) auto_tests=true;;
-        --datagrok) start=true core_only=true;;
-        -jkg|--jupyter-kernel-gateway) start=true jkg=true;;
-        -jn|--jupyter_notebook) start=true jupyter_notebook=true;;
-        -gc|--grok_compute) start=true  grok_compute=true;;
-        -h2o|--h2o) start=true h2o=true;;
+        --datagrok) core_only=true;;
+        -jkg|--jupyter-kernel-gateway) jkg=true;;
+        -jn|--jupyter_notebook) jupyter_notebook=true;;
+        -gc|--grok_compute) grok_compute=true;;
+        -h2o|--h2o) h2o=true;;
         *) echo "Unknown parameter passed: $1"; exit 1;;
         # purge) datagrok_purge ;;
         help | "-h" | "--help")
@@ -640,7 +640,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-if [[ $auto_tests == true && ($update == false || $start == true) ]]; then 
+if [[ $auto_tests == true && $start == true ]]; then 
     start=true
     browser=false
     datagrok_install
@@ -721,6 +721,7 @@ if [[ $start == true ]]; then
     ${db_creds["database_datagrok_password"]//\"/} 
     
 fi
+
 if [[ $update == true ]]; then
     echo $browser
     command="update"

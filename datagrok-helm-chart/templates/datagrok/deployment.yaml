@@ -32,7 +32,8 @@ spec:
       initContainers:
         - name: init-wait-for-db
           image: alpine
-          command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 192.168.49.1 5432 && exit 0 || sleep 3; done; exit 1"]
+          {{ $db_host := .Values.core.datagrok.grok_parameters.dbServer }}
+          command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 {{ $db_host }} 5432 && exit 0 || sleep 3; done; exit 1"]
       containers:
         - envFrom:
             - configMapRef:
