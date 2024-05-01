@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: default run
-        run: ./datagrok-install-kubernetes.sh start --datagrok --auto-tests
+        run: ./datagrok-install-kubernetes.sh --auto-tests
       - name: check status PVCs
         run: |
           namespace="datagrok-latest"
