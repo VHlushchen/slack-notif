@@ -73,7 +73,7 @@ jobs:
       - name: custom version deployment
         run: |
           docker pull datagrok/datagrok:1.18.3
-          ./datagrok-install-kubernetes.sh start --datagrok -v 1.18.3
+          ./datagrok-install-kubernetes.sh start --datagrok -v 1.18.3 --auto-tests
           docker rmi datagrok/datagrok:1.18.3 
   test-config:
     runs-on: ubuntu-latest
@@ -98,7 +98,7 @@ jobs:
           echo '{
             "deployDemo": false,
             "database_host": "host.minikube.internal",
-            "database_name": "datagrok1",
+            "database_name": "datagrok",
             "database_port": 5432,
             "database_admin_username": "superuser",
             "database_admin_password": "superpassword",

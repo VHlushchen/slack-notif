@@ -616,7 +616,7 @@ while [[ "$#" -gt 0 ]]; do
         -gn-v|--grok-connect-version) shift; versions["grok_connect"]="$1";;
         -jn-v|--jupyter-notebook-version) shift; versions["jupyter_notebook"]="$1";;
         -v|--datagrok-version) shift; versions["datagrok"]="$1";;
-        --bleeding-edge) shift; versions["datagrok"]="bleeding-edge";;
+        --bleeding-edge) versions["datagrok"]="bleeding-edge";;
         --host) shift; host="$1";;
         --helm-version) shift; helm_version="$1";;
         --cvm) cvm_only=true;;
@@ -682,7 +682,6 @@ if [[ $config_file == true ]]; then
     done
     start=true  
 fi
-
 
 if [[ $namespace == "" ]]; then
     namespace_gen="datagrok-${versions["datagrok"]//\"/}"
