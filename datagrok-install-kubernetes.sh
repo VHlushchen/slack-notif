@@ -365,7 +365,6 @@ function deploy_helm {
             echo "$(minikube ip) ${datagrok_version//./-}.datagrok.internal"| sudo tee -a /etc/hosts >/dev/null
             fi
             pvcs=$(kubectl get pvc -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
-            echo $pvcs
             # Loop through each PVC and print its name and status
             echo "PVC Name   Status"
             echo "--------------------"
@@ -425,7 +424,7 @@ function deploy_helm {
     fi
     
     start_time_running_state=$(date +%s)
-    timeout_running_state=300
+    timeout_running_state=600
     
     
     while check_any_pod_not_running $namespace; do
