@@ -9,16 +9,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: superuser
-          POSTGRES_PASSWORD: superpassword
-          POSTGRES_DB: postgres
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -55,23 +45,57 @@ jobs:
           ./datagrok-install-kubernetes.sh delete --auto-tests 
           ./datagrok-install-kubernetes.sh -n auto-tests --datagrok --auto-tests
           ./datagrok-install-kubernetes.sh delete -n auto-tests --datagrok --auto-tests
-      - name: Bleeding-edge deployment
-        run: |
-          docker pull datagrok/datagrok:bleeding-edge & docker pull datagrok/grok_connect:bleeding-edge
-          ./datagrok-install-kubernetes.sh start --datagrok --bleeding-edge --auto-tests
-          ./datagrok-install-kubernetes.sh delete --bleeding-edge
-          docker rmi datagrok/datagrok:bleeding-edge & docker rmi datagrok/grok_connect:bleeding-edge
+
       - name: custom version deployment
         run: |
           docker pull datagrok/datagrok:1.18.3
           ./datagrok-install-kubernetes.sh start --datagrok -v 1.18.3
           ./datagrok-install-kubernetes.sh delete -v 1.18.3
           docker rmi datagrok/datagrok:1.18.3 
+  
+  test-bleeding-edge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: superuser
+          POSTGRES_PASSWORD: superpassword
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Bleeding-edge deployment
+        run: |
+          docker pull datagrok/datagrok:bleeding-edge & docker pull datagrok/grok_connect:bleeding-edge
+          ./datagrok-install-kubernetes.sh start --datagrok --bleeding-edge --auto-tests
+          ./datagrok-install-kubernetes.sh delete --bleeding-edge
+          docker rmi datagrok/datagrok:bleeding-edge & docker rmi datagrok/grok_connect:bleeding-edge
+  test-config:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: superuser
+          POSTGRES_PASSWORD: superpassword
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
       - name: Generation config-file
         run: |
           echo '{
             "deployDemo": false,
-            "database_host": "database",
+            "database_host": "host.minikube.internal",
             "database_name": "datagrok1",
             "database_port": 5432,
             "database_admin_username": "superuser",
@@ -86,8 +110,7 @@ jobs:
             "jupyter_notebook_version": "latest"
           }' > config.json
       - name: deployment with config file
-        run: ./datagrok-install-kubernetes.sh start --datagrok --config config.json 
-      
+        run: ./datagrok-install-kubernetes.sh start --datagrok --config config.json
 
       # - name: run without flags
       #   run: ./datagrok-install-kubernetes.sh --auto-tests
