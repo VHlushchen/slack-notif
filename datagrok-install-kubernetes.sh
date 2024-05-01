@@ -226,7 +226,7 @@ function deploy_helm {
     local dbPassword=${24}                  #database_datagrok_password
       
 
-    echo "browsers ${namespace}"
+    echo "jkg version ${jkg_version}"
     if [[ $cvm_only == false && $core_only == false && $jkg == false && $h2o == false && $jupyter_notebook == false && $grok_compute == false ]]; then
         cvm_only=true
         core_only=true
@@ -642,13 +642,16 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
-
-if [[ $auto_tests == true && $start == true || $start == false ]]; then 
+echo "before  $start"
+if [[ $auto_tests == true && $update == false ]]; then 
+    echo "inside $start"
     start=true
     browser=false
     datagrok_install
 fi
+echo $start
 if [[ $auto_tests == true && $update == true ]]; then
+    update=true
     browser=false
 fi
 
