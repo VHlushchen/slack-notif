@@ -42,7 +42,6 @@ jobs:
       - name: datagrok deployment only
         run: |
           ./datagrok-install-kubernetes.sh --datagrok --auto-tests
-          ./datagrok-install-kubernetes.sh delete
       # - name: CVM deployment only
       #   run: ./datagrok-install-kubernetes.sh update --cvm --auto-tests
       # - name: JKG deployment only
