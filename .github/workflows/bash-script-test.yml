@@ -8,7 +8,17 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: superuser
+          POSTGRES_PASSWORD: superpassword
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -46,6 +56,28 @@ jobs:
         run: ./datagrok-install-kubernetes.sh start --datagrok -v 1.18.3  
       - name: delete deployment
         run: ./datagrok-install-kubernetes.sh delete
+      - name: Generation config-file
+        run: |
+          echo '{
+            "deployDemo": false,
+            "database_host": "database",
+            "database_name": "datagrok1",
+            "database_port": 5432,
+            "database_admin_username": "superuser",
+            "database_admin_password": "superpassword",
+            "database_datagrok_username": "dg1",
+            "database_datagrok_password": "dg1",
+            "datagrok_version": "1.18.4",
+            "jkg_version": "latest",
+            "h2o_version": "latest",
+            "grok_compute_version": "latest",
+            "grok_connect_version": "latest",
+            "jupyter_notebook_version": "latest"
+          }' > config.json
+      - name: deployment with config file
+        run: ./datagrok-install-kubernetes.sh start --datagrok --config config.json 
+      
+
       # - name: run without flags
       #   run: ./datagrok-install-kubernetes.sh --auto-tests
       # - name: delete deployment
