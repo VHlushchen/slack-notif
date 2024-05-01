@@ -54,6 +54,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Minikube install
+        run: ./datagrok-install-kubernetes.sh install
       - name: Bleeding-edge deployment
         run: |
           docker pull datagrok/datagrok:bleeding-edge & docker pull datagrok/grok_connect:bleeding-edge
@@ -66,6 +68,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Minikube install
+        run: ./datagrok-install-kubernetes.sh install
       - name: custom version deployment
         run: |
           docker pull datagrok/datagrok:1.18.3
@@ -87,6 +91,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Minikube install
+        run: ./datagrok-install-kubernetes.sh install
       - name: Generation config-file
         run: |
           echo '{
