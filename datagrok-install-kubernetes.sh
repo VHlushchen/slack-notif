@@ -373,7 +373,7 @@ function deploy_helm {
                     if [[ $status == 'Bound' ]]; then
                         echo "$pvc   $status"
                     else
-                        if [[ $status == 'Pending' ]]
+                        if [[ $status == 'Pending' ]]; then
                             echo "$pvc   $status"
                             sleep 20
                         fi
