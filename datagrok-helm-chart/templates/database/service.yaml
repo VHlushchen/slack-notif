@@ -1,4 +1,4 @@
-{{- if .Values.core.enabled -}}
+{{- if or .Values.jkg.enabled .Values.core.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:

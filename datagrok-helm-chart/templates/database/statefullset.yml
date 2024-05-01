@@ -1,4 +1,4 @@
-{{- if .Values.core.enabled -}}
+{{- if or .Values.jkg.enabled .Values.core.enabled -}}
 
 apiVersion: apps/v1
 kind: StatefulSet

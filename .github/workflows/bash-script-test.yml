@@ -12,12 +12,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: default run without flags
-        run: ./datagrok-install-kubernetes.sh --auto-tests
-      - name: delete deployment
-        run: ./datagrok-install-kubernetes.sh delete
-      - name: Datagrok deployment only
-        run: ./datagrok-install-kubernetes.sh start --datagrok --auto-tests
+      - name: datagrok deployment only
+        run: ./datagrok-install-kubernetes.sh --datagrok --auto-tests
       - name: CVM deployment only
         run: ./datagrok-install-kubernetes.sh update --cvm --auto-tests
       - name: JKG deployment only
@@ -34,6 +30,10 @@ jobs:
         run: ./datagrok-install-kubernetes.sh --bleeding-edge --auto-tests
       - name: custom version deployment
         run: ./datagrok-install-kubernetes.sh -v 1.18.3  
+      - name: delete deployment
+        run: ./datagrok-install-kubernetes.sh delete
+      - name: run without flags
+        run: ./datagrok-install-kubernetes.sh --auto-tests
       # - name: delete deployment
       #   run: |
       #     namespace="datagrok-latest"
