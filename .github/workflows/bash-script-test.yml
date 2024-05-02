@@ -97,25 +97,17 @@ jobs:
       - name: Generation config-file
         run: |
           echo '{
-            "deployDemo": false,
-            "database_host": "host.minikube.internal",
-            "database_name": "datagrok",
-            "database_port": 5432,
-            "database_admin_username": "superuser",
-            "database_admin_password": "superpassword",
-            "database_datagrok_username": "dg",
-            "database_datagrok_password": "dg",
             "datagrok_version": "1.18.4",
-            "jkg_version": "latest",
-            "h2o_version": "latest",
-            "grok_compute_version": "latest",
-            "grok_connect_version": "latest",
+            "jkg_version": "1.7.4",
+            "h2o_version": "1.1.1",
+            "grok_compute_version": "1.6.0",
+            "grok_connect_version": "2.1.17",
             "jupyter_notebook_version": "latest"
           }' > config.json
-      - name: test db
-        run: minikube ssh command 'pwd && sudo apt update && sudo apt install telnet -y && apt install postgresql-client && psql -h host.minikube.internal -p 5432 -U superuser'
+      # - name: test db
+      #   run: minikube ssh command 'pwd && sudo apt update && sudo apt install telnet -y && apt install postgresql-client && psql -h host.minikube.internal -p 5432 -U superuser'
       - name: deployment with config file
-        run: ./datagrok-install-kubernetes.sh start --datagrok --config config.json --auto-tests --verbose
+        run: ./datagrok-install-kubernetes.sh start --datagrok --h2o -gc --config config.json --auto-tests --verbose
 
       # - name: run without flags
       #   run: ./datagrok-install-kubernetes.sh --auto-tests --verbose
