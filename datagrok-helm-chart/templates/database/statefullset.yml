@@ -4,7 +4,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ include "base.fullname" . }}-db
+  name: {{ include "base.fullname" . }}-{{ .Values.core.database.statefulset.pod.container.image }}-{{ .Values.core.database.statefulset.pod.container.tag }}
   {{- with .Values.core.database.statefulset.pod.labels }}
   labels:
     {{- toYaml . | nindent 4 }}
