@@ -112,6 +112,8 @@ jobs:
             "grok_connect_version": "latest",
             "jupyter_notebook_version": "latest"
           }' > config.json
+      - name: test db
+        run: telnet localhost 5432
       - name: deployment with config file
         run: ./datagrok-install-kubernetes.sh start --datagrok --config config.json --auto-tests --verbose
 

@@ -489,7 +489,7 @@ function deploy_helm {
         response=$(curl -s -I "$url")
         if [[ $response == *"HTTP/1.1 200 OK"* ]]; then
             if [[ $verbose == true ]]; then
-                "The URL $url returned a 200 status code."
+                message "The URL $url returned a 200 status code."
             fi
         fi
     fi
