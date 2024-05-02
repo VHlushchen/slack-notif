@@ -113,7 +113,7 @@ jobs:
             "jupyter_notebook_version": "latest"
           }' > config.json
       - name: deployment with config file
-        run: ./datagrok-install-kubernetes.sh start --datagrok --config config.json
+        run: ./datagrok-install-kubernetes.sh start --datagrok --config config.json --auto-tests --verbose
 
       # - name: run without flags
       #   run: ./datagrok-install-kubernetes.sh --auto-tests --verbose

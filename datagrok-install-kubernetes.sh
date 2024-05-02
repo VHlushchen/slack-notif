@@ -226,9 +226,6 @@ function deploy_helm {
     local dbLogin=${24}                     #database_datagrok_username
     local dbPassword=${25}                  #database_datagrok_password
     
-    echo " verb $verbose"
-    echo "brow $browser"
-    echo "helm $helm_version"
     if [[ $cvm_only == false && $core_only == false && $jkg == false && $h2o == false && $jupyter_notebook == false && $grok_compute == false ]]; then
         cvm_only=true
         core_only=true
