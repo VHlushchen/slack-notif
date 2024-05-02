@@ -1,0 +1,16 @@
+{
+            "deployDemo": false,
+            "database_host": "host.minikube.internal",
+            "database_name": "datagrok",
+            "database_port": 5432,
+            "database_admin_username": "superuser",
+            "database_admin_password": "superpassword",
+            "database_datagrok_username": "dg1",
+            "database_datagrok_password": "dg1",
+            "datagrok_version": "1.18.4",
+            "jkg_version": "latest",
+            "h2o_version": "latest",
+            "grok_compute_version": "latest",
+            "grok_connect_version": "latest",
+            "jupyter_notebook_version": "latest"
+          }

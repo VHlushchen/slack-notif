@@ -214,17 +214,21 @@ function deploy_helm {
     local grok_connect_version=${12}        #versions["grok_connect"]
     local jupyter_notebook_version="${13}"  #versions["jupyter_notebook"]
     local grok_compute_version=${14}        #versions["grok_compute"]
-    local browser=${15}
-    local helm_version=${16}    
-    local database_internal=${17}
-    local dbServer=${18}                    #database_host
-    local dbPort=${19}                      #database_port
-    local db=${20}                          #database_name    
-    local dbAdminLogin=${21}                #database_admin_username
-    local dbAdminPassword=${22}             #database_admin_password
-    local dbLogin=${23}                     #database_datagrok_username
-    local dbPassword=${24}                  #database_datagrok_password
-      
+    local verbose=${15}
+    local browser=${16}
+    local helm_version=${17}    
+    local database_internal=${18}
+    local dbServer=${19}                    #database_host
+    local dbPort=${20}                      #database_port
+    local db=${21}                          #database_name    
+    local dbAdminLogin=${22}                #database_admin_username
+    local dbAdminPassword=${23}             #database_admin_password
+    local dbLogin=${24}                     #database_datagrok_username
+    local dbPassword=${25}                  #database_datagrok_password
+    
+    echo " verb $verbose"
+    echo "brow $browser"
+    echo "helm $helm_version"
     if [[ $cvm_only == false && $core_only == false && $jkg == false && $h2o == false && $jupyter_notebook == false && $grok_compute == false ]]; then
         cvm_only=true
         core_only=true
@@ -266,10 +270,19 @@ function deploy_helm {
             message "add ${datagrok_version//./-}.datagrok.internal to hosts"
             echo "$(minikube ip) ${datagrok_version//./-}.datagrok.internal"| sudo tee -a /etc/hosts >/dev/null
             fi
-            message "NAMESPACE                     NAME                    STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE"
+            if [[ $verbose == true ]]; then
+                echo ""
+                message "|  NAME   |   STATUS  |   VOLUME  |   CAPACITY    |   ACCESS MODES    |   STORAGECLASS    |   VOLUMEATTRIBUTESCLASS   |   AGE   |"
+                message "---------------------------------------------------------------------------------------------------------------------------------"
+            fi
             for pvc in "${pvcs_list[@]}"; do
                 if kubectl get pvc "$pvc" -n $namespace &>/dev/null; then
-                   kubectl get pvc "$pvc" -n $namespace | grep $pvc 
+                   
+                    if [[ $verbose == true ]]; then
+                        kubectl get pvc "$pvc" -n $namespace | grep $pvc 
+                    else
+                        message "$pvc pvc exist"
+                    fi
                 else
                     message "PVC $pvc does not exist."
                     pvc_exist_status=false
@@ -364,7 +377,9 @@ function deploy_helm {
             message "add ${datagrok_version//./-}.datagrok.internal to hosts"
             echo "$(minikube ip) ${datagrok_version//./-}.datagrok.internal"| sudo tee -a /etc/hosts >/dev/null
             fi
-            message "NAMESPACE                     NAME                    STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE"
+            echo ""
+            message "|  NAME   |   STATUS  |   VOLUME  |   CAPACITY    |   ACCESS MODES    |   STORAGECLASS    |   VOLUMEATTRIBUTESCLASS   |   AGE   |"
+            message "---------------------------------------------------------------------------------------------------------------------------------"
             for pvc in "${pvcs_list[@]}"; do
                 if kubectl get pvc "$pvc" -n $namespace &>/dev/null; then
                    kubectl get pvc "$pvc" -n $namespace | grep $pvc 
@@ -429,7 +444,7 @@ function deploy_helm {
     start_time_running_state=$(date +%s)
     timeout_running_state=600
     
-    
+    echo ""
     while check_any_pod_not_running $namespace; do
         current_time=$(date +%s)
         elapsed_time=$((current_time - start_time_running_state))
@@ -437,9 +452,11 @@ function deploy_helm {
             echo "Timeout reached. Not all pods are running."
             exit 1
         fi
-        echo "Not all pods are running. Waiting..."
-        kubectl get pods -n $namespace
-        sleep 10  # Adjust the delay as needed
+        message "Not all pods are running. Waiting..."
+        if [[ $verbose == true ]]; then
+            kubectl get pods -n $namespace
+        fi
+        sleep 30  # Adjust the delay as needed
     done
     message "All pods are running!"
     start_time_ready_state=$(date +%s)
@@ -453,21 +470,29 @@ function deploy_helm {
         exit 1
     fi
         message "Not all pods are ready. Waiting..."
-        kubectl get pods -n $namespace
-        sleep 10  # Adjust the delay as needed
+        if [[ $verbose == true ]]; then
+            kubectl get pods -n $namespace
+        fi
+        sleep 30  # Adjust the delay as needed
     done
 
     message "All pods are ready!"
-
-    message "services status"
-    kubectl get svc -n $namespace
+    if [[ $verbose == true ]]; then
+        kubectl get pods -n $namespace
+        message "services status"
+        kubectl get svc -n $namespace
+    fi
     url="http://${datagrok_version//./-}.datagrok.internal"
     if [[ $core_only == true ]]; then
-        message "ingress status"
-        kubectl get ingress -n $namespace
+        if [[ $verbose == true ]]; then
+            message "ingress status"
+            kubectl get ingress -n $namespace
+        fi
         response=$(curl -s -I "$url")
         if [[ $response == *"HTTP/1.1 200 OK"* ]]; then
-            echo "The URL $url returned a 200 status code."
+             if [[ $verbose == true ]]; then
+                "The URL $url returned a 200 status code."
+            fi
         fi
     fi
     
@@ -567,6 +592,7 @@ delete=false
 purge=false
 browser=true
 auto_tests=false
+verbose=false
 
 database_internal=true
 cvm_only=false
@@ -627,6 +653,7 @@ while [[ "$#" -gt 0 ]]; do
         --cvm) cvm_only=true;;
         --auto-tests) auto_tests=true;;
         --datagrok) core_only=true;;
+        --verbose) verbose=true;;
         -jkg|--jupyter-kernel-gateway) jkg=true;;
         -jn|--jupyter_notebook) jupyter_notebook=true;;
         -gc|--grok_compute) grok_compute=true;;
@@ -692,7 +719,11 @@ if [[ $namespace == "" ]]; then
     namespace_gen="datagrok-${versions["datagrok"]//\"/}"
     namespace=${namespace_gen//./-}
 fi
+
 if [[ $start == true ]]; then
+    echo "verbose $verbose"
+    echo "brower $browser"
+    echo "helm $helm_version"
     command="start"
     deploy_helm \
     $namespace \
@@ -709,6 +740,7 @@ if [[ $start == true ]]; then
     ${versions["grok_connect"]//\"/} \
     ${versions["jupyter_notebook"]//\"/} \
     ${versions["grok_compute"]//\"/} \
+    $verbose \
     $browser \
     $helm_version \
     $database_internal \
@@ -724,6 +756,7 @@ fi
 
 if [[ $update == true ]]; then
     command="update"
+    
     deploy_helm \
     $namespace \
     $cvm_only \
@@ -739,6 +772,7 @@ if [[ $update == true ]]; then
     ${versions["grok_connect"]//\"/} \
     ${versions["jupyter_notebook"]//\"/} \
     ${versions["grok_compute"]//\"/} \
+    $verbose \
     $browser \
     $helm_version \
     $database_internal \

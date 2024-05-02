@@ -31,20 +31,20 @@ jobs:
       #     docker pull datagrok/jupyter_kernel_gateway:latest & docker pull datagrok/jupyter_kernel_gateway:bleeding-edge
       - name: datagrok deployment only
         run: |
-          ./datagrok-install-kubernetes.sh --datagrok --auto-tests
+          ./datagrok-install-kubernetes.sh --datagrok --auto-tests --verbose
       # - name: CVM deployment only
-      #   run: ./datagrok-install-kubernetes.sh update --cvm --auto-tests
+      #   run: ./datagrok-install-kubernetes.sh update --cvm --auto-tests --verbose
       # - name: JKG deployment only
-      #   run: ./datagrok-install-kubernetes.sh update --datagrok -jkg --auto-tests
+      #   run: ./datagrok-install-kubernetes.sh update --datagrok -jkg --auto-tests --verbose
       - name: h20 deployment only
-        run: ./datagrok-install-kubernetes.sh update -h2o --auto-tests
+        run: ./datagrok-install-kubernetes.sh update -h2o --auto-tests --verbose
       - name: grok compute deploymeny only
-        run: ./datagrok-install-kubernetes.sh update -gc --auto-tests
+        run: ./datagrok-install-kubernetes.sh update -gc --auto-tests --verbose
       - name: custom namespace deployment
         run: |
-          ./datagrok-install-kubernetes.sh delete --auto-tests 
-          ./datagrok-install-kubernetes.sh -n auto-tests --datagrok --auto-tests
-          ./datagrok-install-kubernetes.sh delete -n auto-tests --datagrok --auto-tests
+          ./datagrok-install-kubernetes.sh delete --auto-tests --verbose 
+          ./datagrok-install-kubernetes.sh -n auto-tests --datagrok --auto-tests --verbose
+          ./datagrok-install-kubernetes.sh delete -n auto-tests --datagrok --auto-tests --verbose
 
 
   
@@ -59,9 +59,10 @@ jobs:
       - name: Bleeding-edge deployment
         run: |
           docker pull datagrok/datagrok:bleeding-edge & docker pull datagrok/grok_connect:bleeding-edge
-          ./datagrok-install-kubernetes.sh start --datagrok --bleeding-edge --auto-tests
+          ./datagrok-install-kubernetes.sh start --datagrok --bleeding-edge --auto-tests --verbose
           ./datagrok-install-kubernetes.sh delete --bleeding-edge
           docker rmi datagrok/datagrok:bleeding-edge & docker rmi datagrok/grok_connect:bleeding-edge
+  
   test-custom-version:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -73,7 +74,7 @@ jobs:
       - name: custom version deployment
         run: |
           docker pull datagrok/datagrok:1.18.3
-          ./datagrok-install-kubernetes.sh start --datagrok -v 1.18.3 --auto-tests
+          ./datagrok-install-kubernetes.sh start --datagrok -v 1.18.3 --auto-tests --verbose
           docker rmi datagrok/datagrok:1.18.3 
   test-config:
     runs-on: ubuntu-latest
@@ -102,8 +103,8 @@ jobs:
             "database_port": 5432,
             "database_admin_username": "superuser",
             "database_admin_password": "superpassword",
-            "database_datagrok_username": "dg1",
-            "database_datagrok_password": "dg1",
+            "database_datagrok_username": "dg",
+            "database_datagrok_password": "dg",
             "datagrok_version": "1.18.4",
             "jkg_version": "latest",
             "h2o_version": "latest",
@@ -115,7 +116,7 @@ jobs:
         run: ./datagrok-install-kubernetes.sh start --datagrok --config config.json
 
       # - name: run without flags
-      #   run: ./datagrok-install-kubernetes.sh --auto-tests
+      #   run: ./datagrok-install-kubernetes.sh --auto-tests --verbose
       # - name: delete deployment
       #   run: |
       #     namespace="datagrok-latest"
