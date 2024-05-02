@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "base.fullname" . }}-{{ .Values.cvm.jupyter_notebook.container.name }}
+  name: {{ include "base.fullname" . }}-{{ .Values.cvm.jupyter_notebook.container.name }}-{{ .Values.cvm.jupyter_notebook.container.tag }}
   namespace: {{ .Release.Namespace }}
   {{- with .Values.cvm.jupyter_notebook.labels }}
   labels:

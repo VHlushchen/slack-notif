@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "base.fullname" . }}-{{ .Values.cvm.h2o.container.name }}
+  name: {{ include "base.fullname" . }}-{{ .Values.cvm.h2o.container.name }}-{{ .Values.cvm.h2o.container.tag }}
   namespace: {{ .Release.Namespace }}
   {{- with .Values.cvm.h2o.labels }}
   labels:

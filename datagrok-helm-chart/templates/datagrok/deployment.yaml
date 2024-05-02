@@ -9,7 +9,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   {{ include "base.defaultLabels" . | nindent 4 }}
-  name: {{ include "base.fullname" . }}
+  name: {{ include "base.fullname" . }}-{{ .Values.core.datagrok.container.tag }}
 spec:
   replicas: {{ .Values.core.datagrok.replicas }}
   revisionHistoryLimit: {{ .Values.core.datagrok.revisionHistoryLimit }}
