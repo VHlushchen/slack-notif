@@ -153,6 +153,7 @@ function check_minikube() {
         message "Starting minikube..."
         /usr/local/bin/minikube start
         echo "host.minikube.internal" | sudo tee -a /etc/hosts >/dev/null
+        cat /etc/hosts
     else
         message "minikube is already up and running"
     fi
@@ -487,7 +488,7 @@ function deploy_helm {
         fi
         response=$(curl -s -I "$url")
         if [[ $response == *"HTTP/1.1 200 OK"* ]]; then
-             if [[ $verbose == true ]]; then
+            if [[ $verbose == true ]]; then
                 "The URL $url returned a 200 status code."
             fi
         fi
