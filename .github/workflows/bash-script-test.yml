@@ -113,7 +113,7 @@ jobs:
             "jupyter_notebook_version": "latest"
           }' > config.json
       - name: test db
-        run: minikube ssh command 'pwd && sudo apt update && sudo apt install telnet -y && telnet host.minikube.internal 5432'
+        run: minikube ssh command 'pwd && sudo apt update && sudo apt install telnet -y && telnet host.minikube.internal 5432 && apt install postgresql-client && psql -h host.minikube.internal -p 5432 -U superuser'
       - name: deployment with config file
         run: ./datagrok-install-kubernetes.sh start --datagrok --config config.json --auto-tests --verbose
 
