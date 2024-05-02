@@ -199,7 +199,7 @@ function deploy_helm {
     datagrok_local_url="http://datagrok.datagrok.internal"
     helm_repo="datagrok-test"
     helm_deployment_name="datagrok"
-    pvcs_list=("datagrok-data" "datagrok-cfg" "db-data-datagrok-db-0")
+    pvcs_list=("datagrok-data" "datagrok-cfg" "db-data-datagrok-postgres-12-0")
 
     local namespace="${1}"
     local cvm_only="$2"
@@ -287,8 +287,12 @@ function deploy_helm {
                     while [[ "$pvc_exist_status" != 'true' ]]; do
                         sleep 15
                         if kubectl get pvc "$pvc" -n $namespace &>/dev/null; then
+
                             pvc_exist_status=true
                         else
+                            if [[ $verbose == true ]]; then 
+                                kubectl get pvc "$pvc" -n $namespace | grep $pvc 
+                            fi
                             message "PVC $pvc does not exist. Creating"
                             helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
                             --set cvm.enabled=$cvm_only \
@@ -388,6 +392,7 @@ function deploy_helm {
                         sleep 15
                         if kubectl get pvc "$pvc" -n $namespace &>/dev/null; then
                             pvc_exist_status=true
+
                         else
                             message "PVC $pvc does not exist. Creating"
                             helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
