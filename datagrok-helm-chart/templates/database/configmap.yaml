@@ -1,4 +1,5 @@
-{{- if or .Values.cvm.jkg.enabled .Values.core.enabled -}}
+{{- if .Values.core.enabled -}}
+{{- if .Values.cvm.jkg.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,5 +7,6 @@ metadata:
 data:
 {{- range $key, $value := .Values.core.database.configmap }}
   {{ $key }}: "{{ $value }}"
+{{- end }}
 {{- end }}
 {{- end }}

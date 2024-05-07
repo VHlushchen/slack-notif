@@ -1,8 +1,15 @@
 {
-    "datagrok_version": "1.18.0",
+    "datagrok_version": "1.18.1",
     "jkg_version": "latest",
     "h2o_version": "1.1.1",
     "grok_compute_version": "1.6.0",
     "grok_connect_version": "2.1.17",
-    "jupyter_notebook_version": "latest"
+    "jupyter_notebook_version": "latest",
+    "database_host": "host.minikube.internal",
+    "database_name": "datagrok",
+    "database_port": 15432,
+    "database_admin_username": "root",
+    "database_admin_password": "rootpass",
+    "database_datagrok_username": "dg",
+   "database_datagrok_password": "dg"
   }

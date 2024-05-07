@@ -442,6 +442,7 @@ function deploy_helm {
             --set cvm.h2o.container.tag=$h2o_version \
             --set core.database.enabled=$database_internal \
             --set core.datagrok.grok_parameters.dbServer=$dbServer \
+            --set core.datagrok.grok_parameters.dbPort=$dbPort \
             --set core.datagrok.grok_parameters.db=$db \
             --set core.datagrok.grok_parameters.dbAdminLogin=$dbAdminLogin \
             --set core.datagrok.grok_parameters.dbAdminPassword=$dbAdminPassword \
