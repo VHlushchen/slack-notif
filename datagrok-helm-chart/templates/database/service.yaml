@@ -1,6 +1,4 @@
-{{- if .Values.core.enabled -}}
-{{- if .Values.cvm.jkg.enabled -}}
-
+{{- if or .Values.cvm.jkg.enabled .Values.core.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -23,5 +21,4 @@ spec:
   {{- end }}
     {{- include "base.selectorLabels" . | nindent 4 }}
     
-{{- end }}
 {{- end }}

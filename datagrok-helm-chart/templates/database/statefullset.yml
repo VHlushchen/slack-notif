@@ -1,6 +1,4 @@
-{{- if .Values.core.enabled -}}
-{{- if .Values.cvm.jkg.enabled -}}
-
+{{- if or .Values.cvm.jkg.enabled .Values.core.enabled -}}
 
 apiVersion: apps/v1
 kind: StatefulSet
@@ -63,5 +61,4 @@ spec:
         resources:
           requests:
             storage: {{ .Values.core.database.volumeClaimTemplates.storage }}
-{{- end }}
 {{- end }}
