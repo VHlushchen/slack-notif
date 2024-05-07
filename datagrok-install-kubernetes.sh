@@ -457,7 +457,7 @@ function deploy_helm {
     
     start_time_running_state=$(date +%s)
     timeout_running_state=600
-    sleep 50
+    sleep 120
     echo ""
     while check_any_pod_not_running $namespace; do
         current_time=$(date +%s)
