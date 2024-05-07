@@ -385,6 +385,7 @@ function deploy_helm {
                 message "|  NAME   |   STATUS  |   VOLUME  |   CAPACITY    |   ACCESS MODES    |   STORAGECLASS    |   VOLUMEATTRIBUTESCLASS   |   AGE   |"
                 message "---------------------------------------------------------------------------------------------------------------------------------"
             fi
+            pvcs_list_db_external=("datagrok-data" "datagrok-cfg")
             for pvc in "${pvcs_list[@]}"; do
                 if kubectl get pvc "$pvc" -n $namespace &>/dev/null; then
                    
