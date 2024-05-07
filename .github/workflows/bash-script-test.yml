@@ -98,7 +98,7 @@ jobs:
       - name: Generation config-file
         run: |
           echo '{
-            "datagrok_version": "1.18.4",
+            "datagrok_version": "1.18.0",
             "jkg_version": "1.7.4",
             "h2o_version": "1.1.1",
             "grok_compute_version": "1.6.0",
