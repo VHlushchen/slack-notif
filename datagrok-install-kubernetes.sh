@@ -248,8 +248,9 @@ function deploy_helm {
             if [[ $(helm list -n $namespace -o json | jq -r .[].name) == $helm_deployment_name ]]; then
                 message "$helm_deployment_name is already deployed on the cluster. Run the <./datagrok-install-kubernetes.sh update> to update the datagrok"
             fi
-            #helm install datagrok -n $namespace datagrok-test/datagrok-test \
-            helm install datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+            
+            # helm install datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+            helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
             --set cvm.jkg.enabled=$jkg \
@@ -314,8 +315,9 @@ function deploy_helm {
             done
         fi
         if [ $command == "update" ]; then
-            #helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
-            helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+            
+            # helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+            helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
             --set cvm.jkg.enabled=$jkg \
@@ -346,8 +348,9 @@ function deploy_helm {
             if [[ $(helm list -n $namespace -o json | jq -r .[].name) == $helm_deployment_name ]]; then
                 message "$helm_deployment_name is already deployed on the cluster. Run the <./datagrok-install-kubernetes.sh update> to update the datagrok"
             fi
-            #helm install datagrok -n $namespace datagrok-test/datagrok-test \
-            helm install datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+            
+            # helm install datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+            helm install datagrok -n $namespace datagrok-test/datagrok-test \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
             --set cvm.jkg.enabled=$jkg \
@@ -407,7 +410,8 @@ function deploy_helm {
                                 kubectl get pvc "$pvc" -n $namespace | grep $pvc 
                             fi
                             message "PVC $pvc does not exist. Creating"
-                            helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+                            # helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+                            helm install datagrok -n $namespace datagrok-test/datagrok-test \
                             --set cvm.enabled=$cvm_only \
                             --set core.enabled=$core_only \
                             --set cvm.jkg.enabled=$jkg \
@@ -427,8 +431,8 @@ function deploy_helm {
             done
         fi
         if [[ $command == "update" ]]; then
-            #helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
-            helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+            # helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
+            helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
             --set cvm.jkg.enabled=$jkg \
@@ -486,6 +490,7 @@ function deploy_helm {
         exit 1
     fi
         message "Not all pods are ready. Waiting..."
+
         kubectl logs deployment/datagrok-1-18-0 -c datagrok -n datagrok-1-18-0
         kubectl logs deployment/datagrok-1-18-0 -c init-wait-for-db -n datagrok-1-18-0
         if [[ $verbose == true ]]; then
