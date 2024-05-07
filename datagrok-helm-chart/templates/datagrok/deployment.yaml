@@ -9,7 +9,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   {{ include "base.defaultLabels" . | nindent 4 }}
-  name: {{ include "base.fullname" . }}-{{ .Values.core.datagrok.container.tag }}
+  name: {{ include "base.fullname" . }}-{{ .Values.core.datagrok.container.tag | replace "." "-" }}
 spec:
   replicas: {{ .Values.core.datagrok.replicas }}
   revisionHistoryLimit: {{ .Values.core.datagrok.revisionHistoryLimit }}
@@ -33,7 +33,8 @@ spec:
         - name: init-wait-for-db
           image: alpine
           {{ $db_host := .Values.core.datagrok.grok_parameters.dbServer }}
-          command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 {{ $db_host }} 5432 && exit 0 || sleep 3; done; exit 1"]
+          {{ $db_port := .Values.core.datagrok.grok_parameters.dbPort }}
+          command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 {{ $db_host }} {{ $db_port }} && exit 0 || sleep 3; done; exit 1"]
       containers:
         - envFrom:
             - configMapRef:

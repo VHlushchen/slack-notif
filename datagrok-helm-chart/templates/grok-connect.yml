@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "base.fullname" . }}-{{ .Values.core.grok_connect.container.name }}-{{ .Values.core.grok_connect.container.tag }}
+  name: {{ include "base.fullname" . }}-{{ .Values.core.grok_connect.container.name }}-{{ .Values.core.grok_connect.container.tag | replace "." "-" }}
   namespace: {{ .Release.Namespace }}
   {{- with .Values.core.grok_connect.labels }}
   labels:

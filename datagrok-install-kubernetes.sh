@@ -153,7 +153,6 @@ function check_minikube() {
         message "Starting minikube..."
         /usr/local/bin/minikube start
         echo "host.minikube.internal" | sudo tee -a /etc/hosts >/dev/null
-        cat /etc/hosts
     else
         message "minikube is already up and running"
     fi
@@ -166,10 +165,11 @@ function check_minikube() {
 
     if [[ $(minikube addons list -o json | jq --raw-output .ingress.Status) == "enabled" ]]; then 
         message "Nginx Ingress controller installed"
+        sleep 30
     else
         message "install Nginx Ingress controller"
         minikube addons enable ingress
-        sleep 20
+        sleep 30
         kubectl get validatingwebhookconfigurations
         
     fi
@@ -199,7 +199,7 @@ function deploy_helm {
     datagrok_local_url="http://datagrok.datagrok.internal"
     helm_repo="datagrok-test"
     helm_deployment_name="datagrok"
-    pvcs_list=("datagrok-data" "datagrok-cfg" "db-data-datagrok-postgres-12-0")
+    pvcs_list=("datagrok-data" "datagrok-cfg" "db-data-datagrok-db-0")
 
     local namespace="${1}"
     local cvm_only="$2"
@@ -278,8 +278,8 @@ function deploy_helm {
                    
                     if [[ $verbose == true ]]; then
                         kubectl get pvc "$pvc" -n $namespace | grep $pvc 
-                    else
-                        message "$pvc pvc exist"
+                    # else
+                    #     message "$pvc pvc exist"
                     fi
                 else
                     message "PVC $pvc does not exist."
@@ -366,6 +366,7 @@ function deploy_helm {
             --set core.datagrok.grok_parameters.dbAdminLogin=$dbAdminLogin \
             --set core.datagrok.grok_parameters.dbAdminPassword=$dbAdminPassword \
             --set core.datagrok.grok_parameters.dbLogin=$dbLogin \
+            --set core.datagrok.grok_parameters.dbPort=$dbPort \
             --set core.datagrok.grok_parameters.dbPassword=$dbPassword \
             --set cvm.jkg.grok_parameters.dbServer=$dbServer \
             --set cvm.jkg.grok_parameters.db=$db \
@@ -379,21 +380,31 @@ function deploy_helm {
             message "add ${datagrok_version//./-}.datagrok.internal to hosts"
             echo "$(minikube ip) ${datagrok_version//./-}.datagrok.internal"| sudo tee -a /etc/hosts >/dev/null
             fi
-            echo ""
-            message "|  NAME   |   STATUS  |   VOLUME  |   CAPACITY    |   ACCESS MODES    |   STORAGECLASS    |   VOLUMEATTRIBUTESCLASS   |   AGE   |"
-            message "---------------------------------------------------------------------------------------------------------------------------------"
+            if [[ $verbose == true ]]; then
+                echo ""
+                message "|  NAME   |   STATUS  |   VOLUME  |   CAPACITY    |   ACCESS MODES    |   STORAGECLASS    |   VOLUMEATTRIBUTESCLASS   |   AGE   |"
+                message "---------------------------------------------------------------------------------------------------------------------------------"
+            fi
             for pvc in "${pvcs_list[@]}"; do
                 if kubectl get pvc "$pvc" -n $namespace &>/dev/null; then
-                   kubectl get pvc "$pvc" -n $namespace | grep $pvc 
+                   
+                    if [[ $verbose == true ]]; then
+                        kubectl get pvc "$pvc" -n $namespace | grep $pvc 
+                    # else
+                    #     message "$pvc pvc exist"
+                    fi
                 else
                     message "PVC $pvc does not exist."
                     pvc_exist_status=false
                     while [[ "$pvc_exist_status" != 'true' ]]; do
                         sleep 15
                         if kubectl get pvc "$pvc" -n $namespace &>/dev/null; then
-                            pvc_exist_status=true
 
+                            pvc_exist_status=true
                         else
+                            if [[ $verbose == true ]]; then 
+                                kubectl get pvc "$pvc" -n $namespace | grep $pvc 
+                            fi
                             message "PVC $pvc does not exist. Creating"
                             helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
                             --set cvm.enabled=$cvm_only \
@@ -533,8 +544,9 @@ function datagrok_delete {
 
     local namespace="$1"
     if helm list -n $namespace | grep datagrok &> /dev/null; then
-        helm uninstall datagrok -n $namespace
-        # kubectl delete namespace $namespace
+        helm uninstall datagrok -n $namespace &> /dev/null
+        message "release $namespace uninstalled"
+        # kubectl delete namespace $namespace 
     else
         message "$namespace is not installed"
     fi
@@ -643,7 +655,7 @@ while [[ "$#" -gt 0 ]]; do
         help) Help;;
         --help) Help;;
         -n|--namespace) shift; namespace="$1";;
-        --config) shift; start=true config_file=true config_file_path="$1";;
+        --config) shift; config_file=true config_file_path="$1";;
         -jkg-v|--jupyter-kernel-gateway-version) shift; versions["jkg"]="$1";;
         -h2o-v|--h2o-version) shift; versions["h2o"]="$1";;
         -gc-v|--grok-compute-version) shift; versions["grok_compute"]="$1";;
@@ -671,7 +683,6 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 if [[ $auto_tests == true && $update == false && $delete == false ]]; then 
-    echo "inside $start"
     start=true
     browser=false
     datagrok_install
@@ -709,24 +720,21 @@ if [[ $config_file == true ]]; then
     for key in "${!versions[@]}"; do
         if [ $(jq --arg key "${key}_version" 'has($key)' $config_file_path) == true ]; then
             versions[$key]=$(jq ".${key}_version" $config_file_path)
-            message ">>> Version changed for service $key to ${versions[${key}]}"
+            if [[ $delete == false ]]; then
+                message ">>> Version changed for service $key to ${versions[${key}]}"
+            fi
         else
             message "== ${key}_version is not specified in the config file, the version of $key has not changed"
             message "== Version of the ${key} is ${versions[$key]}"
         fi
-    done
-    start=true  
+    done  
 fi
 
 if [[ $namespace == "" ]]; then
     namespace_gen="datagrok-${versions["datagrok"]//\"/}"
     namespace=${namespace_gen//./-}
 fi
-
 if [[ $start == true ]]; then
-    echo "verbose $verbose"
-    echo "brower $browser"
-    echo "helm $helm_version"
     command="start"
     deploy_helm \
     $namespace \

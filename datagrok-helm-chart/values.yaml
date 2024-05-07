@@ -27,6 +27,7 @@ core:
     grok_parameters:
       deployDemo: false
       dbServer: "database"
+      dbPort: 5432
       db: "datagrok"
       dbAdminLogin: "superuser"
       dbAdminPassword: "WaebwkeBVym11JkNtX6LDuu1dUQEcZGYgVv6"

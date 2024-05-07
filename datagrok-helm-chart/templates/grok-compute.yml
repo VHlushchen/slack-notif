@@ -9,7 +9,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   {{ include "base.defaultLabels" . | nindent 4 }}
-  name: {{ include "base.fullname" . }}-{{ .Values.cvm.grok_compute.container.name }}-{{ .Values.cvm.grok_compute.container.tag }}
+  name: {{ include "base.fullname" . }}-{{ .Values.cvm.grok_compute.container.name }}-{{ .Values.cvm.grok_compute.container.tag | replace "." "-"  }}
 spec:
   replicas: {{ .Values.cvm.grok_compute.replicas }}
   revisionHistoryLimit: 10
