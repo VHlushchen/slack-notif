@@ -467,9 +467,9 @@ function deploy_helm {
             exit 1
         fi
         message "Not all pods are running. Waiting..."
+        kubectl logs deployment/datagrok-1-18-4 -c datagrok -n datagrok-1-18-4
+        kubectl logs deployment/init-wait-for-db -c datagrok -n datagrok-1-18-4
         if [[ $verbose == true ]]; then
-            kubectl logs deployment/datagrok-1-18-4 -c datagrok -n datagrok-1-18-4
-            kubectl logs deployment/init-wait-for-db -c datagrok -n datagrok-1-18-4
             kubectl get pods -n $namespace
             
         fi
