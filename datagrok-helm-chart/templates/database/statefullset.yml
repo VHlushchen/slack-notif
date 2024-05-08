@@ -1,64 +1,64 @@
-{{- if or .Values.cvm.jkg.enabled .Values.core.enabled -}}
+{{- if or .Values.cvm.jkg.enabled .Values.global.core.enabled -}}
 
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ include "base.fullname" . }}-db
-  {{- with .Values.core.database.statefulset.pod.labels }}
+  {{- with .Values.datagrok_test.database.statefulset.pod.labels }}
   labels:
     {{- toYaml . | nindent 4 }}
   {{- end }}
     {{ include "base.defaultLabels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.core.database.statefulset.replicas }}
+  replicas: {{ .Values.datagrok_test.database.statefulset.replicas }}
   serviceName: {{ include "base.fullname" . }}-db
-  replicas: {{ .Values.core.database.statefulset.replicas }}
-  minReadySeconds: {{ .Values.core.database.statefulset.minReadySeconds }}
+  replicas: {{ .Values.datagrok_test.database.statefulset.replicas }}
+  minReadySeconds: {{ .Values.datagrok_test.database.statefulset.minReadySeconds }}
   persistentVolumeClaimRetentionPolicy:
     whenDeleted: Retain
   updateStrategy: 
     type: "RollingUpdate"
   selector:
-    {{- with .Values.core.database.statefulset.pod.labels }}
+    {{- with .Values.datagrok_test.database.statefulset.pod.labels }}
     matchLabels:
       {{- toYaml . | nindent 8 }}
     {{- end }}
       {{ include "base.selectorLabels" . | nindent 8 }}
   template:
     metadata:
-      {{- with .Values.core.database.statefulset.pod.labels }}
+      {{- with .Values.datagrok_test.database.statefulset.pod.labels }}
       labels:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{ include "base.selectorLabels" . | nindent 8 }}
-      {{- with .Values.core.database.statefulset.pod.annotations }}
+      {{- with .Values.datagrok_test.database.statefulset.pod.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }} 
     spec:
-      terminationGracePeriodSeconds: {{ .Values.core.database.statefulset.pod.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.datagrok_test.database.statefulset.pod.terminationGracePeriodSeconds }}
       containers:
-        - name: {{ include "base.fullname" . }}-{{ .Values.core.database.statefulset.pod.container.name }}
-          image: {{ .Values.core.database.statefulset.pod.container.image }}:{{ .Values.core.database.statefulset.pod.container.tag }}
+        - name: {{ include "base.fullname" . }}-{{ .Values.datagrok_test.database.statefulset.pod.container.name }}
+          image: {{ .Values.datagrok_test.database.statefulset.pod.container.image }}:{{ .Values.datagrok_test.database.statefulset.pod.container.tag }}
           imagePullPolicy: Always
           ports:
           - name: http
-            containerPort: {{ .Values.core.database.statefulset.pod.container.port  }}
+            containerPort: {{ .Values.datagrok_test.database.statefulset.pod.container.port  }}
             protocol: TCP
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-db-configmap
           volumeMounts:
-            - mountPath: {{ .Values.core.database.statefulset.pod.container.volume.path }}
-              name: {{ .Values.core.database.volumeClaimTemplates.name }}
+            - mountPath: {{ .Values.datagrok_test.database.statefulset.pod.container.volume.path }}
+              name: {{ .Values.datagrok_test.database.volumeClaimTemplates.name }}
   volumeClaimTemplates:
     - metadata:
-        name: {{ .Values.core.database.volumeClaimTemplates.name }}
+        name: {{ .Values.datagrok_test.database.volumeClaimTemplates.name }}
       spec:
-        accessModes: {{ .Values.core.database.volumeClaimTemplates.accessMode }}
-        storageClassName: {{ .Values.core.database.volumeClaimTemplates.storageClassName | quote }}
+        accessModes: {{ .Values.datagrok_test.database.volumeClaimTemplates.accessMode }}
+        storageClassName: {{ .Values.datagrok_test.database.volumeClaimTemplates.storageClassName | quote }}
         resources:
           requests:
-            storage: {{ .Values.core.database.volumeClaimTemplates.storage }}
+            storage: {{ .Values.datagrok_test.database.volumeClaimTemplates.storage }}
 {{- end }}

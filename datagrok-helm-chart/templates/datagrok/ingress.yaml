@@ -1,21 +1,21 @@
-{{- if .Values.core.enabled -}}
+{{- if .Values.global.core.enabled -}}
 
-{{- if .Values.core.datagrok.ingress.enabled -}}
+{{- if .Values.datagrok_test.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Values.core.datagrok.container.name }}
+  name: {{ .Values.datagrok_test.container.name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "base.defaultLabels" . | nindent 4 }}
-  {{- with .Values.core.datagrok.ingress.annotations }}
+  {{- with .Values.datagrok_test.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.core.datagrok.ingress.tls }}
+  {{- if .Values.datagrok_test.ingress.tls }}
   tls:
-    {{- range .Values.core.datagrok.ingress.tls }}
+    {{- range .Values.datagrok_test.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -24,8 +24,8 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{ $subdomain := .Values.core.datagrok.container.tag | replace "." "-" }}
-    {{- range .Values.core.datagrok.ingress.hosts }}
+    {{ $subdomain := .Values.datagrok_test.container.tag | replace "." "-" }}
+    {{- range .Values.datagrok_test.ingress.hosts }}
     - host: "{{ $subdomain }}.{{ .host }}"
       http:
         paths:

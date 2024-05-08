@@ -1,73 +1,74 @@
 
 networkPolicy:
   enabled: true
-core:
-  enabled: true
-  datagrok:
-    labels:
-      service: datagrok
-    cfg_pvc:
-      name: cfg
-      accessModes: ReadWriteOnce
-      storage: 1Gi 
-    data_pvc:
-      name: data
-      accessModes: ReadWriteOnce
-      storage: 1Gi
-    replicas: 1
-    revisionHistoryLimit: 10
-    strategy_type: RollingUpdate
-    container:
-      name: datagrok
-      image: datagrok/datagrok
-      tag: latest
-      port: 8080
-    service:
-      type: ClusterIP
-    grok_parameters:
-      deployDemo: false
-      dbServer: "database"
-      dbPort: 5432
-      db: "datagrok"
-      dbAdminLogin: "superuser"
-      dbAdminPassword: "WaebwkeBVym11JkNtX6LDuu1dUQEcZGYgVv6"
-      dbLogin: "dg"
-      dbPassword: "dg"
-      adminPassword: "admin"
-      adminDevKey: "admin"
-      isolatesCount: 2
+global:
+  core:
+    enabled: false
+datagrok_test:
+  labels:
+    service: datagrok
+  cfg_pvc:
+    name: cfg
+    accessModes: ReadWriteOnce
+    storage: 1Gi 
+  data_pvc:
+    name: data
+    accessModes: ReadWriteOnce
+    storage: 1Gi
+  replicas: 1
+  revisionHistoryLimit: 10
+  strategy_type: RollingUpdate
+  container:
+    name: datagrok
+    image: datagrok/datagrok
+    tag: latest
+    port: 8080
+  service:
+    type: ClusterIP
+  grok_parameters:
+    deployDemo: false
+    dbServer: "database"
+    dbPort: 5432
+    db: "datagrok"
+    dbAdminLogin: "superuser"
+    dbAdminPassword: "WaebwkeBVym11JkNtX6LDuu1dUQEcZGYgVv6"
+    dbLogin: "dg"
+    dbPassword: "dg"
+    adminPassword: "admin"
+    adminDevKey: "admin"
+  isolatesCount: 2
     
-    livenessProbe:
-      httpGet:
-        path: /api/admin/health
-        port: 8080
-      failureThreshold: 3
-      timeoutSeconds: 10
-      periodSeconds: 20 # default
-    readinessProbe:
-      httpGet:
-        path: /api/admin/health
-        port: 8080
-      failureThreshold: 3
-      timeoutSeconds: 10
-      periodSeconds: 20
-    startupProbe:
-      httpGet:
-        path: /api/admin/health
-        port: 8080
-      failureThreshold: 90
-      periodSeconds: 30
-    ingress:
-      enabled: true
-      annotations: {}
-      tls: {}
-      hosts:
-        - host: datagrok.internal
-          paths:
-          - path: /
-            backend:
-              serviceName: datagrok-service
-              servicePort: http
+  livenessProbe:
+    httpGet:
+      path: /api/admin/health
+      port: 8080
+    failureThreshold: 3
+    timeoutSeconds: 10
+    periodSeconds: 20 # default
+  readinessProbe:
+    httpGet:
+      path: /api/admin/health
+      port: 8080
+    failureThreshold: 3
+    timeoutSeconds: 10
+    periodSeconds: 20
+  startupProbe:
+    httpGet:
+      path: /api/admin/health
+      port: 8080
+    failureThreshold: 90
+    periodSeconds: 30
+  ingress:
+    enabled: true
+    annotations: {}
+    tls: {}
+    hosts:
+      - host: datagrok.internal
+        paths:
+        - path: /
+          backend:
+            serviceName: datagrok-service
+            servicePort: http
   database:
     enabled: true
     name: database
@@ -100,38 +101,39 @@ core:
       storageClassName: standard
       storage: 1Gi
 
-  grok_connect:
-    restartPolicy: Always
-    labels:
-      service: grok-connect
-    strategy_type: RollingUpdate
-    container:
-      name: grok-connect
-      image: datagrok/grok_connect
-      tag: latest
+
+datagrok_grok_connect:
+  restartPolicy: Always
+  labels:
+    service: grok-connect
+  strategy_type: RollingUpdate
+  container:
+    name: grok-connect
+    image: datagrok/grok_connect
+    tag: latest
+    port: 1234
+  service:
+    type: ClusterIP
+  livenessProbe:
+    httpGet:
+      path: /health
       port: 1234
-    service:
-      type: ClusterIP
-    livenessProbe:
-      httpGet:
-        path: /health
-        port: 1234
-      failureThreshold: 3
-      timeoutSeconds: 10
-      periodSeconds: 20 # default
-    readinessProbe:
-      httpGet:
-        path: /health
-        port: 1234
-      failureThreshold: 3
-      timeoutSeconds: 10
-      periodSeconds: 20
-    startupProbe:
-      httpGet:
-        path: /health
-        port: 1234
-      failureThreshold: 90
-      periodSeconds: 30
+    failureThreshold: 3
+    timeoutSeconds: 10
+    periodSeconds: 20 # default
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 1234
+    failureThreshold: 3
+    timeoutSeconds: 10
+    periodSeconds: 20
+  startupProbe:
+    httpGet:
+      path: /health
+      port: 1234
+    failureThreshold: 90
+    periodSeconds: 30
 cvm:
   enabled: true
   jkg:

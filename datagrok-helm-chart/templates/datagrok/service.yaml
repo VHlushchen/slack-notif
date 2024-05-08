@@ -1,22 +1,22 @@
-{{- if .Values.core.enabled -}}
+{{- if .Values.global.core.enabled -}}
 
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "base.fullname" . }}-service
-  {{- with .Values.core.datagrok.labels }}
+  {{- with .Values.datagrok_test.labels }}
   labels:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 {{ include "base.defaultLabels" . | nindent 4 }}
 spec:
-  type: {{ .Values.core.datagrok.service.type }}
+  type: {{ .Values.datagrok_test.service.type }}
   ports:
-    - port: {{ .Values.core.datagrok.container.port }}
-      targetPort: {{ .Values.core.datagrok.container.targetPort }}
+    - port: {{ .Values.datagrok_test.container.port }}
+      targetPort: {{ .Values.datagrok_test.container.targetPort }}
       protocol: TCP 
       name: http
-  {{- with .Values.core.datagrok.labels }}
+  {{- with .Values.datagrok_test.labels }}
   selector:
     {{- toYaml . | nindent 4 }}
     {{- end }}

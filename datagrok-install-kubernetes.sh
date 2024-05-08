@@ -249,8 +249,9 @@ function deploy_helm {
                 message "$helm_deployment_name is already deployed on the cluster. Run the <./datagrok-install-kubernetes.sh update> to update the datagrok"
             fi
             
-            # helm install datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
-            helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
+            
+            # helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
+            helm install datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
             --set cvm.jkg.enabled=$jkg \
@@ -315,9 +316,8 @@ function deploy_helm {
             done
         fi
         if [ $command == "update" ]; then
-            
-            # helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
-            helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
+            # helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
+            helm upgrade datagrok -n $namespace datagrok-helm-chart -f datagrok-helm-chart/values.yaml \
             --set cvm.enabled=$cvm_only \
             --set core.enabled=$core_only \
             --set cvm.jkg.enabled=$jkg \

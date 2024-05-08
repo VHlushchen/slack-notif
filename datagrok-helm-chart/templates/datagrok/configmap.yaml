@@ -1,4 +1,4 @@
-{{- if .Values.core.enabled -}}
+{{- if .Values.global.core.enabled -}}
 
 apiVersion: v1
 kind: ConfigMap
@@ -7,9 +7,9 @@ metadata:
 data: 
   GROK_PARAMETERS: |-
     {
-      {{- $len := sub (len .Values.core.datagrok.grok_parameters) 1 }}
+      {{- $len := sub (len .Values.datagrok_test.grok_parameters) 1 }}
       {{- $count := 1 }}
-      {{- range $key, $value := .Values.core.datagrok.grok_parameters }}
+      {{- range $key, $value := .Values.datagrok_test.grok_parameters }}
       {{ if le $count $len }}
         {{- if kindIs "string" $value }}
           {{- $key | quote | indent 2}}: {{ $value | quote }},

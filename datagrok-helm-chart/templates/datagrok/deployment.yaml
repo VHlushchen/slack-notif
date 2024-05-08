@@ -1,29 +1,29 @@
-{{- if .Values.core.enabled -}}
+{{- if .Values.global.core.enabled -}}
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: {{ .Release.Namespace }}
-  {{- with .Values.core.datagrok.labels }}
+  {{- with .Values.datagrok_test.labels }}
   labels:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   {{ include "base.defaultLabels" . | nindent 4 }}
-  name: {{ include "base.fullname" . }}-{{ .Values.core.datagrok.container.tag | replace "." "-" }}
+  name: {{ include "base.fullname" . }}-{{ .Values.datagrok_test.container.tag | replace "." "-" }}
 spec:
-  replicas: {{ .Values.core.datagrok.replicas }}
-  revisionHistoryLimit: {{ .Values.core.datagrok.revisionHistoryLimit }}
+  replicas: {{ .Values.datagrok_test.replicas }}
+  revisionHistoryLimit: {{ .Values.datagrok_test.revisionHistoryLimit }}
   selector:
-    {{- with .Values.core.datagrok.labels }}
+    {{- with .Values.datagrok_test.labels }}
     matchLabels:
       {{- toYaml . | nindent 8 }}
     {{- end }}
       {{ include "base.selectorLabels" . | nindent 8 }}
   strategy:
-    type: {{ .Values.core.datagrok.strategy_type }}
+    type: {{ .Values.datagrok_test.strategy_type }}
   template:
     metadata:
-      {{- with .Values.core.datagrok.labels }}
+      {{- with .Values.datagrok_test.labels }}
       labels:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -32,28 +32,28 @@ spec:
       initContainers:
         - name: init-wait-for-db
           image: alpine
-          {{ $db_host := .Values.core.datagrok.grok_parameters.dbServer }}
-          {{ $db_port := .Values.core.datagrok.grok_parameters.dbPort }}
+          {{ $db_host := .Values.datagrok_test.grok_parameters.dbServer }}
+          {{ $db_port := .Values.datagrok_test.grok_parameters.dbPort }}
           command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 {{ $db_host }} {{ $db_port }} && exit 0 || sleep 3; done; exit 1"]
       containers:
         - envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-grok-parameters-configmap             
-          image: {{ .Values.core.datagrok.container.image }}:{{ .Values.core.datagrok.container.tag }}
+          image: {{ .Values.datagrok_test.container.image }}:{{ .Values.datagrok_test.container.tag }}
           imagePullPolicy: Always
           name: datagrok
           ports:
-            - containerPort: {{ .Values.core.datagrok.container.port }}
+            - containerPort: {{ .Values.datagrok_test.container.port }}
           tty: true
-          {{- with .Values.core.datagrok.livenessProbe }}
+          {{- with .Values.datagrok_test.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.core.datagrok.readinessProbe }}
+          {{- with .Values.datagrok_test.readinessProbe }}
           readinessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.core.datagrok.startupProbe }}
+          {{- with .Values.datagrok_test.startupProbe }}
           startupProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -66,8 +66,8 @@ spec:
       volumes:
         - name: datagrok-data
           persistentVolumeClaim:
-            claimName: {{ include "base.fullname" . }}-{{ .Values.core.datagrok.data_pvc.name }}
+            claimName: {{ include "base.fullname" . }}-{{ .Values.datagrok_test.data_pvc.name }}
         - name: datagrok-cfg
           persistentVolumeClaim:
-            claimName: {{ include "base.fullname" . }}-{{ .Values.core.datagrok.cfg_pvc.name }}
+            claimName: {{ include "base.fullname" . }}-{{ .Values.datagrok_test.cfg_pvc.name }}
 {{- end }}

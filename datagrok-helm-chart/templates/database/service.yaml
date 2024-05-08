@@ -1,21 +1,21 @@
-{{- if or .Values.cvm.jkg.enabled .Values.core.enabled -}}
+{{- if or .Values.cvm.jkg.enabled .Values.global.core.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.core.database.name }} #{{ include "base.fullname" . }}-db-service
-  {{- with .Values.core.database.statefulset.pod.labels }}
+  name: {{ .Values.datagrok_test.database.name }} #{{ include "base.fullname" . }}-db-service
+  {{- with .Values.datagrok_test.database.statefulset.pod.labels }}
   labels:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 {{ include "base.selectorLabels" . | indent 4 }}
 spec:
-  type: {{ .Values.core.database.service.type }}
+  type: {{ .Values.datagrok_test.database.service.type }}
   ports:
-    - port: {{ .Values.core.database.statefulset.pod.container.port  }}
-      targetPort: {{ .Values.core.database.statefulset.pod.container.port  }}
+    - port: {{ .Values.datagrok_test.database.statefulset.pod.container.port  }}
+      targetPort: {{ .Values.datagrok_test.database.statefulset.pod.container.port  }}
       protocol: TCP
       name: http
-  {{- with .Values.core.database.statefulset.pod.labels }}
+  {{- with .Values.datagrok_test.database.statefulset.pod.labels }}
   selector:
     {{- toYaml . | nindent 4}}
   {{- end }}
