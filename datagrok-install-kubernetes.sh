@@ -463,7 +463,6 @@ function deploy_helm {
     
     start_time_running_state=$(date +%s)
     timeout_running_state=600
-    sleep 100
     echo ""
     while check_any_pod_not_running $namespace; do
         current_time=$(date +%s)
@@ -491,8 +490,6 @@ function deploy_helm {
     fi
         message "Not all pods are ready. Waiting..."
 
-        kubectl logs deployment/datagrok-1-18-0 -c datagrok -n datagrok-1-18-0
-        kubectl logs deployment/datagrok-1-18-0 -c init-wait-for-db -n datagrok-1-18-0
         if [[ $verbose == true ]]; then
             kubectl get pods -n $namespace
         fi

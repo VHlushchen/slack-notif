@@ -1,33 +1,38 @@
-
-
+enabled: false
 restartPolicy: Always
 labels:
-  service: grok-connect
+  service: h2o
 strategy_type: RollingUpdate
 container:
-  name: grok-connect
-  image: datagrok/grok_connect
+  name: h2o
+  image: datagrok/h2o
   tag: latest
-  port: 1234
+  ports:
+    http: 
+      name: http
+      port: 54321
+    helper: 
+      name: helper
+      port: 5005
 service:
   type: ClusterIP
 livenessProbe:
   httpGet:
-    path: /health
-    port: 1234
+    path: /helper/info
+    port: 5005
   failureThreshold: 3
   timeoutSeconds: 10
   periodSeconds: 20 # default
 readinessProbe:
   httpGet:
-    path: /health
-    port: 1234
+    path: /helper/info
+    port: 5005
   failureThreshold: 3
   timeoutSeconds: 10
   periodSeconds: 20
 startupProbe:
   httpGet:
-    path: /health
-    port: 1234
+    path: /helper/info
+    port: 5005
   failureThreshold: 90
   periodSeconds: 30

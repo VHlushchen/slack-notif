@@ -1,4 +1,4 @@
-{{- if .Values.global.core.enabled -}}
+{{- if or .Values.global.cvm.enabled .Values.enabled -}}
 
 apiVersion: apps/v1
 kind: Deployment
@@ -31,6 +31,8 @@ spec:
     spec:
       containers:
         - image: {{ .Values.container.image }}:{{ .Values.container.tag }}
+          imagePullPolicy: {{ .Values.container.imagePullPolicy }}
+          name: {{ .Values.container.name }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
@@ -43,12 +45,10 @@ spec:
           startupProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          imagePullPolicy: {{ .Values.container.imagePullPolicy }}
-          name: {{ .Values.container.name }}
           ports:
-            - containerPort: {{ .Values.container.port }}
+            - containerPort: {{ .Values.container.ports.http.port }}
+            - containerPort: {{ .Values.container.ports.helper.port }}
       restartPolicy: {{ .Values.restartPolicy }}
-
  
 {{- end }}
 
