@@ -1,0 +1,19 @@
+apiVersion: v2
+appVersion: 1.20.x
+dependencies:
+- name: datagrok_grok_connect
+  repository: '@datagrok'
+  version: 0.2.0
+- name: datagrok_h2o
+  repository: '@datagrok'
+  version: 0.2.0
+- name: datagrok_jkg
+  repository: '@datagrok'
+  version: 0.3.0
+- name: datagrok_jupyter_notebook
+  repository: '@datagrok'
+  version: 0.2.0
+description: A Helm chart for Kubernetes
+name: datagrok-test
+type: application
+version: 1.0.5
