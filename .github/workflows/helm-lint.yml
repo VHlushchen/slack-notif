@@ -19,7 +19,7 @@ jobs:
       - name: helm lint h2o
         run: helm lint datagrok_h2o
       - name: helm lint jkg
-        run: heln lint datagrok_jkg
+        run: helm lint datagrok_jkg
       - name: helm lint jupyter_notebook
         run: helm lint datagrok_jupyter_notebook       
       

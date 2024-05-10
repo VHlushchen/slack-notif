@@ -200,6 +200,7 @@ function deploy_helm {
     helm_repo="datagrok-test"
     helm_deployment_name="datagrok"
     pvcs_list=("datagrok-data" "datagrok-cfg" "db-data-datagrok-db-0")
+    helm_chart="$helm_chart"
 
     local namespace="${1}"
     local cvm_only="$2"
@@ -215,17 +216,18 @@ function deploy_helm {
     local grok_connect_version=${12}        #versions["grok_connect"]
     local jupyter_notebook_version="${13}"  #versions["jupyter_notebook"]
     local grok_compute_version=${14}        #versions["grok_compute"]
-    local verbose=${15}
-    local browser=${16}
-    local helm_version=${17}    
-    local database_internal=${18}
-    local dbServer=${19}                    #database_host
-    local dbPort=${20}                      #database_port
-    local db=${21}                          #database_name    
-    local dbAdminLogin=${22}                #database_admin_username
-    local dbAdminPassword=${23}             #database_admin_password
-    local dbLogin=${24}                     #database_datagrok_username
-    local dbPassword=${25}                  #database_datagrok_password
+    local auto_tests=${15}
+    local verbose=${16}
+    local browser=${17}
+    local helm_version=${18}    
+    local database_internal=${19}
+    local dbServer=${20}                    #database_host
+    local dbPort=${21}                      #database_port
+    local db=${22}                          #database_name    
+    local dbAdminLogin=${23}                #database_admin_username
+    local dbAdminPassword=${24}             #database_admin_password
+    local dbLogin=${25}                     #database_datagrok_username
+    local dbPassword=${26}                  #database_datagrok_password
     
     if [[ $cvm_only == false && $core_only == false && $jkg == false && $h2o == false && $jupyter_notebook == false && $grok_compute == false ]]; then
         cvm_only=true
@@ -241,7 +243,9 @@ function deploy_helm {
         db=true
         grok_connect=true
     fi
-   
+    if [[ $auto_tests == true ]]; then
+        helm_chart="datagrok-helm-chart"
+    fi
     if [[ $database_internal == true ]]; then
         if [ $command == "start" ]; then
             if kubectl get namespace $namespace &> /dev/null; then
@@ -263,7 +267,7 @@ function deploy_helm {
             
             # helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
             echo "datagrok $datagrok_container"
-            helm install datagrok -n $namespace datagrok/datagrok-test \
+            helm install datagrok -n $namespace $helm_chart \
             --set enabled=$datagrok_container \
             --set database.enabled=$db \
             --set datagrok_jkg.enabled=$jkg \
@@ -308,7 +312,7 @@ function deploy_helm {
                                 kubectl get pvc "$pvc" -n $namespace | grep $pvc 
                             fi
                             message "PVC $pvc does not exist. Creating"
-                            helm upgrade datagrok -n $namespace datagrok/datagrok-test \
+                            helm upgrade datagrok -n $namespace $helm_chart \
                             --set enabled=$datagrok_container \
                             --set database.enabled=$db \
                             --set datagrok_jkg.enabled=$jkg \
@@ -330,7 +334,7 @@ function deploy_helm {
         if [ $command == "update" ]; then
             # helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
             echo "$datagrok_container datagrok"
-            helm upgrade datagrok -n $namespace datagrok/datagrok-test \
+            helm upgrade datagrok -n $namespace $helm_chart \
             --set enabled=$datagrok_container \
             --set database.enabled=$db \
             --set datagrok_jkg.enabled=$jkg \
@@ -362,7 +366,7 @@ function deploy_helm {
                 message "$helm_deployment_name is already deployed on the cluster. Run the <./datagrok-install-kubernetes.sh update> to update the datagrok"
             fi
             
-            # helm install datagrok -n $namespace datagrok/datagrok-test \
+            # helm install datagrok -n $namespace $helm_chart \
             helm install datagrok -n $namespace datagrok-test/datagrok-test \
             --set enabled=$datagrok_container \
             --set database.enabled=$db \
@@ -423,7 +427,7 @@ function deploy_helm {
                                 kubectl get pvc "$pvc" -n $namespace | grep $pvc 
                             fi
                             message "PVC $pvc does not exist. Creating"
-                            # helm upgrade datagrok -n $namespace datagrok/datagrok-test \
+                            # helm upgrade datagrok -n $namespace $helm_chart \
                             helm install datagrok -n $namespace datagrok-test/datagrok-test \
                             --set enabled=$datagrok_container \
                             --set database.enabled=$db \
@@ -444,7 +448,7 @@ function deploy_helm {
             done
         fi
         if [[ $command == "update" ]]; then
-            # helm upgrade datagrok -n $namespace datagrok/datagrok-test \
+            # helm upgrade datagrok -n $namespace $helm_chart \
             helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
             --set enabled=$datagrok_container \
             --set database.enabled=$db \
@@ -767,6 +771,7 @@ if [[ $start == true ]]; then
     ${versions["grok_connect"]//\"/} \
     ${versions["jupyter_notebook"]//\"/} \
     ${versions["grok_compute"]//\"/} \
+    $auto_tests \
     $verbose \
     $browser \
     $helm_version \
@@ -799,6 +804,7 @@ if [[ $update == true ]]; then
     ${versions["grok_connect"]//\"/} \
     ${versions["jupyter_notebook"]//\"/} \
     ${versions["grok_compute"]//\"/} \
+    $auto_tests \
     $verbose \
     $browser \
     $helm_version \
