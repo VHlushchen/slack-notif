@@ -200,7 +200,7 @@ function deploy_helm {
     helm_repo="datagrok-test"
     helm_deployment_name="datagrok"
     pvcs_list=("datagrok-data" "datagrok-cfg" "db-data-datagrok-db-0")
-    helm_chart="$helm_chart"
+    helm_chart="datagrok/datagrok-test"
 
     local namespace="${1}"
     local cvm_only="$2"
@@ -244,7 +244,7 @@ function deploy_helm {
         grok_connect=true
     fi
     if [[ $auto_tests == true ]]; then
-        helm_chart="datagrok-helm-chart"
+        helm_chart="datagrok-helm-chart -f datagrok-helm-chart/values.yaml "
     fi
     if [[ $database_internal == true ]]; then
         if [ $command == "start" ]; then
@@ -265,7 +265,7 @@ function deploy_helm {
             fi
             
             
-            # helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
+            # helm upgrade datagrok -n $namespace $helm_chart \
             echo "datagrok $datagrok_container"
             helm install datagrok -n $namespace $helm_chart \
             --set enabled=$datagrok_container \
@@ -332,8 +332,8 @@ function deploy_helm {
             done
         fi
         if [ $command == "update" ]; then
-            # helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
-            echo "$datagrok_container datagrok"
+            # helm upgrade datagrok -n $namespace $helm_chart \
+            echo "$helm_chart datagrok"
             helm upgrade datagrok -n $namespace $helm_chart \
             --set enabled=$datagrok_container \
             --set database.enabled=$db \
@@ -367,7 +367,7 @@ function deploy_helm {
             fi
             
             # helm install datagrok -n $namespace $helm_chart \
-            helm install datagrok -n $namespace datagrok-test/datagrok-test \
+            helm install datagrok -n $namespace $helm_chart \
             --set enabled=$datagrok_container \
             --set database.enabled=$db \
             --set datagrok_jkg.enabled=$jkg \
@@ -428,7 +428,7 @@ function deploy_helm {
                             fi
                             message "PVC $pvc does not exist. Creating"
                             # helm upgrade datagrok -n $namespace $helm_chart \
-                            helm install datagrok -n $namespace datagrok-test/datagrok-test \
+                            helm install datagrok -n $namespace $helm_chart \
                             --set enabled=$datagrok_container \
                             --set database.enabled=$db \
                             --set datagrok_jkg.enabled=$jkg \
@@ -449,7 +449,7 @@ function deploy_helm {
         fi
         if [[ $command == "update" ]]; then
             # helm upgrade datagrok -n $namespace $helm_chart \
-            helm upgrade datagrok -n $namespace datagrok-test/datagrok-test \
+            helm upgrade datagrok -n $namespace $helm_chart \
             --set enabled=$datagrok_container \
             --set database.enabled=$db \
             --set datagrok_jkg.enabled=$jkg \
