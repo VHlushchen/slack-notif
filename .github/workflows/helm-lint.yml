@@ -42,11 +42,85 @@ jobs:
         if: steps.chart_changes.outputs.jn == 'true'
         run: helm lint datagrok_jupyter_notebook       
       - name: start minikube
+        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
         id: minikube
         uses: medyagh/setup-minikube@latest
         with:
           addons: registry,ingress
           cache: false
           driver: docker
+      - name: Create namespace
+        run: kubectl create namespace datagrok-autotests
+      - name: deploy grok_connect
+        if: steps.chart_changes.outputs.grok_connect == 'true'
+        working-directory: datagrok_grok_connect
+        run: helm install grok_connect . -f values.yaml -n datagrok-autotests
+      - name: deploy h2o
+        if: steps.chart_changes.outputs.h2o == 'true'
+        working-directory: datagrok_h2o
+        run: helm install h2o . -f values.yaml -n datagrok-autotests
+      - name: deploy jupyter_notebook
+        if: steps.chart_changes.outputs.jn == 'true'
+        working-directory: datagrok_jupyter_notebook
+        run: helm install jupyter_notebook . -f values.yaml -n datagrok-autotests
+      - name: deploy jkg
+        if: steps.chart_changes.outputs.jkg == 'true'
+        working-directory: datagrok_jkg
+        run: helm install jkg . -f values.yaml -n datagrok-autotests
+      - name: check running state
+        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
+        run: |
+          check_any_pod_not_running() {
+            local namespace=$1
+            while read -r pod status; do
+                if [[ "$status" != "Running" ]]; then
+                    return 0
+                fi
+            done < <(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.phase}{"\n"}{end}')
+            return 1
+          }
+          start_time_running_state=$(date +%s)
+          timeout_running_state=600
+          while check_any_pod_not_running $namespace; do
+            current_time=$(date +%s)
+            elapsed_time=$((current_time - start_time_running_state))
+            if (( elapsed_time >= timeout_running_state )); then
+                echo "Timeout reached. Not all pods are running."
+                exit 1
+            fi
+            echo "Not all pods are running. Waiting..."
+            echo "____________________________________"
+            kubectl get pods -n $namespace            
+            sleep 10  # Adjust the delay as needed
+          done  
+      - name: Check ready state
+        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
+        run: |
+          check_any_pod_not_ready() {
+              local namespace=$1
+              while read -r pod ready; do
+                  if [[ "$ready" != "True" ]]; then
+                      return 0
+                  fi
+              done < <(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[?(@.type=="Ready")]}{.status}{"\n"}{end}')
+              return 1
+          }
+          start_time_ready_state=$(date +%s)
+          timeout_ready_state=120
+          
+          while check_any_pod_not_ready $namespace; do
+            current_time=$(date +%s)
+            elapsed_time=$((current_time - start_time_ready_state))
+            if (( elapsed_time >= timeout_ready_state )); then
+                echo "Timeout reached. Not all pods are ready."
+                exit 1
+            fi
+                echo "Not all pods are ready. Waiting..."
+                echo "__________________________________"
+                kubectl get pods -n $namespace
+                sleep 30  # Adjust the delay as needed
+          done
+      
+
         
       
