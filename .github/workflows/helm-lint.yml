@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  helm-check:
+  helm-lint-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -26,6 +26,16 @@ jobs:
               - 'datagrok_jupyter_notebook/**'
             datagrok:
               - 'datagrok-helm-chart/**'
+            grok_connect_publish:
+              - 'datagrok_grok_connect/Chart.yaml'
+            h2o_publish:
+              - 'datagrok_h2o/Chart.yaml'
+            jkg_publish:
+              - 'datagrok_jkg/Chart.yaml'
+            jn_publish:
+              - 'datagrok_jupyter_notebook/Chart.yaml'
+            datagrok_publish:
+              - 'datagrok-helm-chart/Chart.yaml'
       - name: datagrok lint
         if: steps.chart_changes.outputs.datagrok == 'true'
         run: helm lint datagrok-helm-chart
@@ -121,7 +131,31 @@ jobs:
                 kubectl get pods -n datagrok
                 sleep 30  # Adjust the delay as needed
           done
-      
+      - name: Publish grok_connect
+        if: steps.chart_changes.outputs.grok_connect == 'true'  
+        run: |
+          helm package datagrok_grok_connect -d charts/
+          #helm push
+          ls charts
+      - name: Publish h2o
+        if: steps.chart_changes.outputs.h2o == 'true'  
+        run: |
+          helm package datagrok_h2o -d charts/
+          #helm push
+          ls charts
+      - name: Publish jkg
+        if: steps.chart_changes.outputs.jkg == 'true'  
+        run: |
+          helm package datagrok_jkg -d charts/
+          #helm push
+          ls charts
+      - name: Publish jupyter_notebook
+        if: steps.chart_changes.outputs.jn == 'true'  
+        run: |
+          helm package datagrok_jupyter_notebook -d charts/
+          #helm push
+          ls charts
+
 
         
       
