@@ -50,3 +50,4 @@ grok_parameters:
   jupyterToken: "4b8ed936cf61a1c5e37a8b3a845599941c272de6e29330a0"
   capabilities: 
     - "jupyter"
+    #!
