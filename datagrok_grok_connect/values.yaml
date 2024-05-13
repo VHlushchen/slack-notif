@@ -1,7 +1,6 @@
 
-global:
-  core: 
-    enabled: true
+
+enabled: true
 restartPolicy: Always
 labels:
   service: grok-connect
@@ -9,7 +8,7 @@ strategy_type: RollingUpdate
 container:
   name: grok-connect
   image: datagrok/grok_connect
-  tag: 1.16.0
+  tag: latest
   port: 1234
 service:
   type: ClusterIP
