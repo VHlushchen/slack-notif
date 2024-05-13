@@ -78,6 +78,12 @@ jobs:
         if: steps.chart_changes.outputs.jkg == 'true'
         working-directory: datagrok_jkg
         run: helm install jkg . -f values.yaml -n datagrok
+      - name: deploy datagrok
+        if: steps.chart_changes.outputs.jkg == 'true'
+        working-directory: datagrok-helm-chart
+        run: | 
+          helm dependency update
+          helm install datagrok . -f values.yaml -n datagrok
       - name: check running state
         if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
         run: |
