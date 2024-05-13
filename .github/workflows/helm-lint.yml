@@ -50,6 +50,7 @@ jobs:
           cache: false
           driver: docker
       - name: Create namespace
+        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
         run: kubectl create namespace datagrok-autotests
       - name: deploy grok_connect
         if: steps.chart_changes.outputs.grok_connect == 'true'
