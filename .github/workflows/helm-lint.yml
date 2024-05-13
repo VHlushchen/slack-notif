@@ -104,6 +104,11 @@ jobs:
             kubectl get pods -n datagrok            
             sleep 10  # Adjust the delay as needed
           done  
+          echo "  _ _ _ _ _ _ _ _ _ _ _ _ "
+          echo " |                       |"
+          echo " | All pods are running  |"
+          echo " |_ _ _ _ _ _ _ _ _ _ _ _|"
+          kubectl get pods -n datagrok
       - name: Check ready state
         if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
         run: |
@@ -131,6 +136,12 @@ jobs:
                 kubectl get pods -n datagrok
                 sleep 30  # Adjust the delay as needed
           done
+          echo "  _ _ _ _ _ _ _ _ _ _ _ "
+          echo " |                     |"
+          echo " | All pods are ready  |"
+          echo " |_ _ _ _ _ _ _ _ _ _ _|"
+          kubectl get pods -n datagrok
+      
       - name: Publish grok_connect
         if: steps.chart_changes.outputs.grok_connect == 'true'  
         run: |
