@@ -35,4 +35,4 @@ startupProbe:
     path: /helper/info
     port: 5005
   failureThreshold: 90
-  periodSeconds: 30 #1
+  periodSeconds: 30 

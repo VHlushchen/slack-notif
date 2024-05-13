@@ -65,25 +65,26 @@ jobs:
       - name: deploy grok connect
         if: steps.chart_changes.outputs.grok_connect == 'true'
         working-directory: datagrok_grok_connect
-        run: helm install grok-connect . -f values.yaml -n datagrok
+        run: helm install grok-connect-test . -f values.yaml -n datagrok
       - name: deploy h2o
         if: steps.chart_changes.outputs.h2o == 'true'
         working-directory: datagrok_h2o
-        run: helm install h2o . -f values.yaml -n datagrok
+        run: helm install h2o-test . -f values.yaml -n datagrok
       - name: deploy jupyter notebook
         if: steps.chart_changes.outputs.jn == 'true'
         working-directory: datagrok_jupyter_notebook
-        run: helm install jupyter-notebook . -f values.yaml -n datagrok
+        run: helm install jupyter-notebook-test . -f values.yaml -n datagrok
       - name: deploy jkg
         if: steps.chart_changes.outputs.jkg == 'true'
         working-directory: datagrok_jkg
-        run: helm install jkg . -f values.yaml -n datagrok
+        run: helm install jkg-test . -f values.yaml -n datagrok
       - name: deploy datagrok
         if: steps.chart_changes.outputs.jkg == 'true'
         working-directory: datagrok-helm-chart
-        run: | 
+        run: |
+          
           helm dependency update
-          helm install datagrok . -f values.yaml -n datagrok
+          helm install datagrok-test . -f values.yaml -n datagrok
       - name: check running state
         if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
         run: |
