@@ -12,27 +12,20 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: start minikube
-        id: minikube
-        with:
-          addons: registry,ingress
-          cache: false
-          driver: docker
-        uses: medyagh/setup-minikube@latest
       - uses: dorny/paths-filter@v3
         id:  chart_changes
         with:
           filters: |
             grok_connect:
-              - 'datagrok_grok_connect'
+              - 'datagrok_grok_connect/**'
             h2o:
-              - 'datagrok_h2o'
+              - 'datagrok_h2o/**'
             jkg:
-              - 'datagrok_jkg'
+              - 'datagrok_jkg/**'
             jn:
-              - 'datagrok_jupyter_notebook'
+              - 'datagrok_jupyter_notebook/**'
             datagrok:
-              - 'datagrok-helm-chart'
+              - 'datagrok-helm-chart/**'
       - name: datagrok lint
         if: steps.chart_changes.outputs.datagrok == 'true'
         run: helm lint datagrok-helm-chart
@@ -48,5 +41,12 @@ jobs:
       - name: helm lint jupyter_notebook
         if: steps.chart_changes.outputs.jn == 'true'
         run: helm lint datagrok_jupyter_notebook       
-      
+      - name: start minikube
+        id: minikube
+        uses: medyagh/setup-minikube@latest
+        with:
+          addons: registry,ingress
+          cache: false
+          driver: docker
+        
       
