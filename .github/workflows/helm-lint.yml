@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  test-start-update:
+  helm-check:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -51,23 +51,23 @@ jobs:
           driver: docker
       - name: Create namespace
         if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
-        run: kubectl create namespace datagrok-autotests
+        run: kubectl create namespace datagrok
       - name: deploy grok_connect
         if: steps.chart_changes.outputs.grok_connect == 'true'
         working-directory: datagrok_grok_connect
-        run: helm install grok_connect . -f values.yaml -n datagrok-autotests
+        run: helm install grok_connect . -f values.yaml -n datagrok
       - name: deploy h2o
         if: steps.chart_changes.outputs.h2o == 'true'
         working-directory: datagrok_h2o
-        run: helm install h2o . -f values.yaml -n datagrok-autotests
+        run: helm install h2o . -f values.yaml -n datagrok
       - name: deploy jupyter_notebook
         if: steps.chart_changes.outputs.jn == 'true'
         working-directory: datagrok_jupyter_notebook
-        run: helm install jupyter_notebook . -f values.yaml -n datagrok-autotests
+        run: helm install jupyter_notebook . -f values.yaml -n datagrok
       - name: deploy jkg
         if: steps.chart_changes.outputs.jkg == 'true'
         working-directory: datagrok_jkg
-        run: helm install jkg . -f values.yaml -n datagrok-autotests
+        run: helm install jkg . -f values.yaml -n datagrok
       - name: check running state
         if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
         run: |
@@ -77,12 +77,12 @@ jobs:
                 if [[ "$status" != "Running" ]]; then
                     return 0
                 fi
-            done < <(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.phase}{"\n"}{end}')
+            done < <(kubectl get pods -n datagrok --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.phase}{"\n"}{end}')
             return 1
           }
           start_time_running_state=$(date +%s)
           timeout_running_state=600
-          while check_any_pod_not_running $namespace; do
+          while check_any_pod_not_running datagrok; do
             current_time=$(date +%s)
             elapsed_time=$((current_time - start_time_running_state))
             if (( elapsed_time >= timeout_running_state )); then
@@ -91,7 +91,7 @@ jobs:
             fi
             echo "Not all pods are running. Waiting..."
             echo "____________________________________"
-            kubectl get pods -n $namespace            
+            kubectl get pods -n datagrok            
             sleep 10  # Adjust the delay as needed
           done  
       - name: Check ready state
@@ -103,13 +103,13 @@ jobs:
                   if [[ "$ready" != "True" ]]; then
                       return 0
                   fi
-              done < <(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[?(@.type=="Ready")]}{.status}{"\n"}{end}')
+              done < <(kubectl get pods -n datagrok --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[?(@.type=="Ready")]}{.status}{"\n"}{end}')
               return 1
           }
           start_time_ready_state=$(date +%s)
           timeout_ready_state=120
           
-          while check_any_pod_not_ready $namespace; do
+          while check_any_pod_not_ready datagrok; do
             current_time=$(date +%s)
             elapsed_time=$((current_time - start_time_ready_state))
             if (( elapsed_time >= timeout_ready_state )); then
@@ -118,7 +118,7 @@ jobs:
             fi
                 echo "Not all pods are ready. Waiting..."
                 echo "__________________________________"
-                kubectl get pods -n $namespace
+                kubectl get pods -n datagrok
                 sleep 30  # Adjust the delay as needed
           done
       
