@@ -3,7 +3,7 @@ entries:
   datagrok:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-05-08T11:28:33.185670304+03:00"
+    created: "2024-05-16T14:35:38.013923818+03:00"
     description: A Helm chart for Kubernetes
     digest: 916cc52ce19022b3e21f13b2992342659916f2998bf1df69162309428792f911
     name: datagrok
@@ -13,8 +13,31 @@ entries:
     version: 1.0.1
   datagrok-test:
   - apiVersion: v2
+    appVersion: 1.19.x
+    created: "2024-05-16T14:35:38.019262003+03:00"
+    dependencies:
+    - name: datagrok_grok_connect
+      repository: '@datagrok'
+      version: 0.2.0
+    - name: datagrok_h2o
+      repository: '@datagrok'
+      version: 0.2.0
+    - name: datagrok_jkg
+      repository: '@datagrok'
+      version: 0.3.0
+    - name: datagrok_jupyter_notebook
+      repository: '@datagrok'
+      version: 0.2.0
+    description: A Helm chart for Kubernetes
+    digest: 19527d4b1ce3b5b030850ee50db3a7449fe3bff366da2dbb912d764566be3074
+    name: datagrok-test
+    type: application
+    urls:
+    - datagrok-test-1.0.3.tgz
+    version: 1.0.3
+  - apiVersion: v2
     appVersion: 1.16.0, 1.17.0
-    created: "2024-05-08T11:28:33.18714809+03:00"
+    created: "2024-05-16T14:35:38.016807987+03:00"
     dependencies:
     - name: datagrok_grok_connect
       repository: file://charts/grok_connect/
@@ -28,7 +51,7 @@ entries:
     version: 1.0.2
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-05-08T11:28:33.186331592+03:00"
+    created: "2024-05-16T14:35:38.015630602+03:00"
     description: A Helm chart for Kubernetes
     digest: 954a6592203ede412a27e1e8c44e1e4b943a417bb8e571a69d9c0fa477561f84
     name: datagrok-test
@@ -36,15 +59,4 @@ entries:
     urls:
     - datagrok-test-1.0.1.tgz
     version: 1.0.1
-  datagrok_grok_connect:
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2024-05-08T11:28:33.18731322+03:00"
-    description: A Helm chart for Kubernetes
-    digest: f8e984c5823bdfd52d5b387139edc33dbde42671f915b604dc665e8af0525431
-    name: datagrok_grok_connect
-    type: application
-    urls:
-    - datagrok_grok_connect-0.1.0.tgz
-    version: 0.1.0
-generated: "2024-05-08T11:28:33.18488028+03:00"
+generated: "2024-05-16T14:35:38.000634892+03:00"

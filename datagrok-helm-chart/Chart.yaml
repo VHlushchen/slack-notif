@@ -15,35 +15,23 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.0.4
+version: 1.0.3
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "1.20.x"
+appVersion: "1.19.x"
 dependencies:
-- name: datagrok_grok_connect
-  version: 0.1.0
-  repository: "file://../datagrok_grok_connect"
-- name: datagrok_h2o
-  version: 0.1.0
-  repository: "file://../datagrok_h2o"
-- name: datagrok_jkg
-  version: 0.1.0
-  repository: "file://../datagrok_jkg"
-- name: datagrok_jupyter_notebook
-  version: 0.1.0
-  repository: "file://../datagrok_jupyter_notebook"
-# - name: datagrok_grok_connect
-#   version: 0.2.0
-#   repository: "@datagrok"
-# - name: datagrok_h2o
-#   version: 0.2.0
-#   repository: "@datagrok"
-# - name: datagrok_jkg
-#   version: 0.3.0
-#   repository: "@datagrok"
-# - name: datagrok_jupyter_notebook
-#   version: 0.2.0
-#   repository: "@datagrok"
+ - name: datagrok_grok_connect
+   version: 0.2.0
+   repository: "@datagrok"
+ - name: datagrok_h2o
+   version: 0.2.0
+   repository: "@datagrok"
+ - name: datagrok_jkg
+   version: 0.3.0
+   repository: "@datagrok"
+ - name: datagrok_jupyter_notebook
+   version: 0.2.0
+   repository: "@datagrok"
