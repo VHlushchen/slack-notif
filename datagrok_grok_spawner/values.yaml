@@ -31,7 +31,7 @@ service:
 #  failureThreshold: 90
 #  periodSeconds: 30
 secrets:
-  github_token: "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"
+  github_token: ""
   registry:
     dockerconfigjson: '{"auths": {"localhost:32558": {"auth": "YWRtaW46em9tYm9xMmM=", "username": "YWRtaW4=", "password": "em9tYm9xMmM="}}}'
     configjson: '{"auths": {"nexus-nexus-repository-manager-docker-5000.nexus.svc.cluster.local:5000": {"auth": "YWRtaW46em9tYm9xMmM="}}}'
