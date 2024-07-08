@@ -1,0 +1,40 @@
+enabled: true
+restartPolicy: Always
+labels:
+  service: grok-xspawner
+strategy_type: RollingUpdate
+container:
+  name: grok-spawner
+  image: localhost:32558/nexus-docker/grok_spawner
+  tag: latest
+  port: 8000
+service:
+  type: ClusterIP
+#livenessProbe:
+#  httpGet:
+#    path: /health
+#    port: 8000
+#  failureThreshold: 3
+#  timeoutSeconds: 10
+#  periodSeconds: 20 # default
+#readinessProbe:
+#  httpGet:
+#    path: /health
+#    port: 8000
+#  failureThreshold: 3
+#  timeoutSeconds: 10
+#  periodSeconds: 20
+#startupProbe:
+#  httpGet:
+#    path: /health
+#    port: 8000
+#  failureThreshold: 90
+#  periodSeconds: 30
+secrets:
+  github_token: "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"
+  registry:
+    dockerconfigjson: '{"auths": {"localhost:32558": {"auth": "YWRtaW46em9tYm9xMmM=", "username": "YWRtaW4=", "password": "em9tYm9xMmM="}}}'
+    configjson: '{"auths": {"nexus-nexus-repository-manager-docker-5000.nexus.svc.cluster.local:5000": {"auth": "YWRtaW46em9tYm9xMmM="}}}'
+env:
+  GROK_SPAWNER_ENVIRONMENT: kubernetes
+  GROK_SPAWNER_CONFIGURATION: configuration.yaml

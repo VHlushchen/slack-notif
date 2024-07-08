@@ -97,7 +97,7 @@ database:
   volumeClaimTemplates:
     name: db-data
     accessMode: [ "ReadWriteOnce" ]
-    storageClassName: standard
+    storageClassName: microk8s-hostpath
     storage: 1Gi
 
 
