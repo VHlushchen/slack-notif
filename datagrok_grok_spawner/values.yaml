@@ -33,8 +33,8 @@ service:
 secrets:
   github_token: ""
   registry:
-    dockerconfigjson: '{"auths": {"localhost:32558": {"auth": "YWRtaW46em9tYm9xMmM=", "username": "YWRtaW4=", "password": "em9tYm9xMmM="}}}'
-    configjson: '{"auths": {"nexus-nexus-repository-manager-docker-5000.nexus.svc.cluster.local:5000": {"auth": "YWRtaW46em9tYm9xMmM="}}}'
+    dockerconfigjson: '{"auths": {"localhost:32558": {"auth": "", "username": "YWRtaW4=", "password": ""}}}'
+    configjson: '{"auths": {"nexus-nexus-repository-manager-docker-5000.nexus.svc.cluster.local:5000": {"auth": ""}}}'
 env:
   GROK_SPAWNER_ENVIRONMENT: kubernetes
   GROK_SPAWNER_CONFIGURATION: configuration.yaml
