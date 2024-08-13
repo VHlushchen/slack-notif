@@ -33,11 +33,11 @@ startupProbe:
   periodSeconds: 30
 secrets:
   registry:
-    dockerconfigjson: '{"auths": {"nexus.datagrok.ai": {"auth": "YWRtaW46ZGF0YWdyb2s=", "username": "admin", "password": "datagrok"}}}'
+    dockerconfigjson: '{"auths": {"registry.hub.docker.com": {}}}'
     configjson: '{"auths": {"registry.kube-system.svc.cluster.local:80": {"auth": "YWRtaW46ZGF0YWdyb2s="}}}'
   minio:
     accesKey: datagrok
-    secretKey: rZmZ8hFNMs
+    secretKey: datagrok
     api: http://minio.dev-minio.svc.cluster.local:9000
 env:
   GROK_SPAWNER_ENVIRONMENT: kubernetes
