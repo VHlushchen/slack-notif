@@ -48,10 +48,9 @@ metadata:
       {{- end }}
     {{- end }}
 spec:
-  type: {{ $.Values.service.docker.type }}
+  type: {{ $.Values.service.type }}
   ports:
     - port: {{ $registry.port }}
-      nodePort: 32558
       protocol: TCP
       name: docker-{{ $registry.port }}
   selector:

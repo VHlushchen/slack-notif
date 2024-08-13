@@ -175,6 +175,16 @@ function check_minikube() {
     fi
     # sleep 10
 }
+
+function check_helm() {
+    if ! [ -x "$(command -v helm)" ]; then
+        message "Installing helm..."
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+    fi
+}
+
 check_any_pod_not_running() {
     local namespace=$1
     while read -r pod status; do
@@ -551,14 +561,7 @@ function deploy_helm {
     fi
   
 }
-function check_helm() {
-    if ! [ -x "$(command -v helm)" ]; then
-        message "Installing helm..."
-        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-        chmod 700 get_helm.sh
-        ./get_helm.sh   
-    fi    
-}
+
 
 function datagrok_delete {
 

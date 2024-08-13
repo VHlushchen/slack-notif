@@ -4,6 +4,7 @@ networkPolicy:
 
 
 enabled: true
+local: true
 labels:
   service: datagrok
 cfg_pvc:
@@ -20,7 +21,7 @@ strategy_type: RollingUpdate
 container:
   name: datagrok
   image: datagrok/datagrok
-  tag: latest
+  tag: 1.19.2
   port: 8080
 service:
   type: ClusterIP
@@ -59,15 +60,25 @@ startupProbe:
   periodSeconds: 30
 ingress:
   enabled: true
+  ingressClassName: nginx
   annotations: {}
   tls: {}
+  local:
+    enabled: true
+    hosts:
+      - host: datagrok.internal
+        paths:
+        - path: /
+          backend:
+            serviceName: datagrok-service
+            servicePort: http
   hosts:
-    - host: datagrok.internal
+    - host: datagrok.ai
       paths:
-      - path: /
-        backend:
-          serviceName: datagrok-service
-          servicePort: http
+        - path: /
+          backend:
+            serviceName: datagrok-service
+            servicePort: http
 database:
   enabled: true
   name: database
@@ -97,7 +108,7 @@ database:
   volumeClaimTemplates:
     name: db-data
     accessMode: [ "ReadWriteOnce" ]
-    storageClassName: microk8s-hostpath
+    storageClassName: standard
     storage: 1Gi
 
 
@@ -136,7 +147,7 @@ datagrok_grok_connect:
     periodSeconds: 30
 
 datagrok_jkg:
-  enabled: true
+  enabled: false
   restartPolicy: Always
   labels:
     service: jkg
@@ -189,7 +200,7 @@ datagrok_jkg:
       - "jupyter"
 
 datagrok_jupyter_notebook:
-  enabled: true
+  enabled: false
   restartPolicy: Always
   labels:
     service: jupyter-notebook
@@ -228,45 +239,51 @@ datagrok_jupyter_notebook:
     failureThreshold: 90
     periodSeconds: 30
 
-datagrok_h2o:
+datagrok_grok_spawner:
   enabled: true
   restartPolicy: Always
   labels:
-    service: h2o
+    service: grok-spawner
   strategy_type: RollingUpdate
   container:
-    name: h2o
-    image: datagrok/h2o
-    tag: latest
-    ports:
-      http: 
-        name: http
-        port: 54321
-      helper: 
-        name: helper
-        port: 5005
+    name: grok-spawner
+    image: docker-registry.datagrok.ai/grok_spawner
+    tag: local
+    port: 8000
+    imagePullPolicy: Always
   service:
     type: ClusterIP
   livenessProbe:
     httpGet:
-      path: /helper/info
-      port: 5005
+      path: /info
+      port: 8000
     failureThreshold: 3
     timeoutSeconds: 10
     periodSeconds: 20 # default
   readinessProbe:
     httpGet:
-      path: /helper/info
-      port: 5005
+      path: /info
+      port: 8000
     failureThreshold: 3
     timeoutSeconds: 10
     periodSeconds: 20
   startupProbe:
     httpGet:
-      path: /helper/info
-      port: 5005
+      path: /info
+      port: 8000
     failureThreshold: 90
     periodSeconds: 30
+  secrets:
+    registry:
+      dockerconfigjson: '{"auths": {"docker-registry.datagrok.ai": {"auth": "YWRtaW46ZGF0YWdyb2s=", "username": "admin", "password": "datagrok"}}}'
+      configjson: '{"auths": {"registry.minikube:80": {"auth": "YWRtaW46ZGF0YWdyb2s="}}}'
+    minio:
+      accesKey: datagrok
+      secretKey: rZmZ8hFNMs
+      api: http://minio.dev-minio.svc.cluster.local:9000
+  env:
+    GROK_SPAWNER_ENVIRONMENT: kubernetes
+    GROK_SPAWNER_CONFIGURATION: configuration.yaml
 
 
 

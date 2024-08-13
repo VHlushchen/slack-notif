@@ -13,6 +13,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
   {{- if .Values.ingress.tls }}
   tls:
     {{- range .Values.ingress.tls }}
@@ -24,8 +25,9 @@ spec:
     {{- end }}
   {{- end }}
   rules:
+  {{- if .Values.ingress.local.enabled }}
     {{ $subdomain := .Values.container.tag | replace "." "-" }}
-    {{- range .Values.ingress.hosts }}
+    {{- range .Values.ingress.local.hosts }}
     - host: "{{ $subdomain }}.{{ .host }}"
       http:
         paths:
@@ -36,8 +38,24 @@ spec:
               service:
                 name: {{ .backend.serviceName }}
                 port:
-                  name: {{ .backend.servicePort }}
+                  number: {{ .backend.servicePort }}
           {{- end }}
     {{- end }}
+  {{- else }}
+    {{- range .Values.ingress.hosts }}
+    - host: "{{ .host }}"
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ .path }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .backend.serviceName }}
+                port:
+                  number: {{ .backend.servicePort }}
+        {{- end }}
+    {{- end }}
+  {{- end }}
   {{- end }}
 {{- end }}
