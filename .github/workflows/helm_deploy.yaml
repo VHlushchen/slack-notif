@@ -23,8 +23,12 @@ jobs:
       - name: Determine Changed Charts
         id: changes
         run: |
-          CHANGED_CHARTS=$(git diff --name-only HEAD^ HEAD | grep '^base/' | awk -F'/' '{print $2}' | uniq)          echo "changed_charts=$CHANGED_CHARTS" >> $GITHUB_ENV
-
+          if git rev-parse HEAD^ >/dev/null 2>&1; then
+          CHANGED_CHARTS=$(git diff --name-only HEAD^ HEAD | grep '^base/' | awk -F'/' '{print $2}' | uniq)
+          else
+          CHANGED_CHARTS=$(git diff --name-only $(git rev-list --max-parents=0 HEAD) HEAD | grep '^base/' | awk -F'/' '{print $2}' | uniq)
+          fi
+          echo "changed_charts=$CHANGED_CHARTS" >> $GITHUB_ENV
       - name: Build Helm Charts
         if: env.changed_charts != ''
         run: |
