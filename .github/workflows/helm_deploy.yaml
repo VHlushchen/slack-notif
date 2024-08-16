@@ -1,41 +1,61 @@
-name: Build and Push Helm Charts
+name: Build and Publish Helm Charts
 
 on:
   push:
     branches:
-      - master
+      - main  # Only trigger on pushes to the main branch
+    paths:
+      - 'base/**'  # Monitor changes in the base directory
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Set up Helm
         uses: azure/setup-helm@v3
         with:
-          version: '3.8.2'
+          version: v3.7.0  # Adjust the Helm version as needed
 
-      - name: Install Helm Plugin for Registry
-        run: helm plugin install https://github.com/chartmuseum/helm-push.git
-
-#      - name: Authenticate Docker
-#        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin ${{ secrets.REGISTRY_URL }}
-
-      - name: Detect Changed Helm Charts
+      - name: Determine Changed Charts
         id: changes
         run: |
-          echo "CHANGED_CHARTS=$(git diff --name-only HEAD~1 HEAD | grep 'base/' | cut -d '/' -f 2 | uniq)" >> $GITHUB_ENV
-      - name: check changes
-        run: echo $CHANGED_CHARTS
-#      - name: Build and Push Changed Helm Charts
-#        if: env.CHANGED_CHARTS != ''
-#        run: |
-#          for chart in $CHANGED_CHARTS; do
-#            echo "Packaging $chart..."
-#            helm package charts/$chart
-#            echo "Pushing $chart..."
-#            helm cm-push ./$chart-*.tgz ${{ secrets.REGISTRY_URL }}
-#          done
+          CHANGED_CHARTS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^base/' | awk -F'/' '{print $2}' | uniq)
+          echo "changed_charts=$CHANGED_CHARTS" >> $GITHUB_ENV
+
+      - name: Build Helm Charts
+        if: env.changed_charts != ''
+        run: |
+          mkdir -p ./packages
+          for chart in ${{ env.changed_charts }}; do
+            echo "Building chart: $chart"
+            helm dependency update base/$chart
+            helm package base/$chart --destination ./charts
+          done
+          helm index charts
+
+      - name: Update Published Packages Info
+        if: env.changed_charts != ''
+        run: |
+          COMMIT_MESSAGE="Update published packages:"
+          for chart in ${{ env.changed_charts }}; do
+            CHART_VERSION=$(helm show chart base/$chart | grep version: | awk '{print $2}')
+            echo "Package: $chart" >> published-packages-info.txt
+            echo "Version: $CHART_VERSION" >> published-packages-info.txt
+            echo "Date: $(date -u)" >> published-packages-info.txt
+            echo "" >> published-packages-info.txt
+            COMMIT_MESSAGE="$COMMIT_MESSAGE $chart-$CHART_VERSION"
+          done
+          echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_ENV
+
+      - name: Commit and Push Changes
+        if: env.changed_charts != ''
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add published-packages-info.txt
+          git commit -m "${{ env.commit_message }}"
+          git push origin main

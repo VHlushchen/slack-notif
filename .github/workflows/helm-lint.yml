@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'base/*'
+      - 'base/**'
 
 jobs:
   helm-lint-deploy:
