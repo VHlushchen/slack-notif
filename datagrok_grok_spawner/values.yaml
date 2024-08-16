@@ -33,8 +33,8 @@ startupProbe:
   periodSeconds: 30
 secrets:
   registry:
-    dockerconfigjson: '{"auths": {"registry.hub.docker.com": {}}}'
-    configjson: '{"auths": {"registry.kube-system.svc.cluster.local:80": {"auth": "YWRtaW46ZGF0YWdyb2s="}}}'
+    dockerconfigjson: ''
+    configjson: ''
   minio:
     accesKey: datagrok
     secretKey: datagrok
