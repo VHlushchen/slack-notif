@@ -15,11 +15,11 @@ imagePullSecrets:
 
 nexus:
   docker:
-    enabled: enable
-    registries:
-      - host: dev.docker-registry.datagrok.ai
-        port: 5000
-        secretName: registry-secret
+    enabled: false
+    # registries:
+    #   - host: dev.docker-registry.datagrok.ai
+    #     port: 5000
+    #     secretName: registry-secret
   env:
     # minimum recommended memory settings for a small, person instance from
     # https://help.sonatype.com/repomanager3/product-information/system-requirements
