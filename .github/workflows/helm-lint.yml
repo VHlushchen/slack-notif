@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    paths:
+      '- base/*'
 
 jobs:
   helm-lint-deploy:
@@ -17,25 +19,25 @@ jobs:
         with:
           filters: |
             grok_connect:
-              - 'datagrok_grok_connect/**'
+              - 'base/datagrok_grok_connect/**'
             h2o:
-              - 'datagrok_h2o/**'
+              - 'base/datagrok_h2o/**'
             jkg:
-              - 'datagrok_jkg/**'
+              - 'base/datagrok_jkg/**'
             jn:
-              - 'datagrok_jupyter_notebook/**'
+              - 'base/datagrok_jupyter_notebook/**'
             datagrok:
-              - 'datagrok-helm-chart/**'
+              - 'base/datagrok-helm-chart/**'
             grok_connect_publish:
-              - 'datagrok_grok_connect/Chart.yaml'
+              - 'base/datagrok_grok_connect/Chart.yaml'
             h2o_publish:
-              - 'datagrok_h2o/Chart.yaml'
+              - 'base/datagrok_h2o/Chart.yaml'
             jkg_publish:
-              - 'datagrok_jkg/Chart.yaml'
+              - 'base/datagrok_jkg/Chart.yaml'
             jn_publish:
-              - 'datagrok_jupyter_notebook/Chart.yaml'
+              - 'base/datagrok_jupyter_notebook/Chart.yaml'
             datagrok_publish:
-              - 'datagrok-helm-chart/Chart.yaml'
+              - 'base/datagrok-helm-chart/Chart.yaml'
       - name: datagrok lint
         if: steps.chart_changes.outputs.datagrok == 'true'
         run: helm lint datagrok-helm-chart
@@ -93,75 +95,79 @@ jobs:
           helm dependency update
           helm install datagrok-test . -f values.yaml -n datagrok --dry-run
           helm install datagrok-test . -f values.yaml -n datagrok
-      - name: check running state
-        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
+#      - name: check running state
+#        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
+#        run: |
+#          check_any_pod_not_running() {
+#            local namespace=$1
+#            while read -r pod status; do
+#                if [[ "$status" != "Running" ]]; then
+#                    return 0
+#                fi
+#            done < <(kubectl get pods -n datagrok --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.phase}{"\n"}{end}')
+#            return 1
+#          }
+#          start_time_running_state=$(date +%s)
+#          timeout_running_state=600
+#          while check_any_pod_not_running datagrok; do
+#            current_time=$(date +%s)
+#            elapsed_time=$((current_time - start_time_running_state))
+#            if (( elapsed_time >= timeout_running_state )); then
+#                echo "Timeout reached. Not all pods are running."
+#                exit 1
+#            fi
+#            echo "Not all pods are running. Waiting..."
+#            echo "____________________________________"
+#            kubectl get pods -n datagrok
+#            sleep 10  # Adjust the delay as needed
+#          done
+#          echo "  _ _ _ _ _ _ _ _ _ _ _ _ "
+#          echo " |                       |"
+#          echo " | All pods are running  |"
+#          echo " |_ _ _ _ _ _ _ _ _ _ _ _|"
+#          kubectl get pods -n datagrok
+#      - name: Check ready state
+#        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
+#        run: |
+#          check_any_pod_not_ready() {
+#              local namespace=$1
+#              while read -r pod ready; do
+#                  if [[ "$ready" != "True" ]]; then
+#                      return 0
+#                  fi
+#              done < <(kubectl get pods -n datagrok --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[?(@.type=="Ready")]}{.status}{"\n"}{end}')
+#              return 1
+#          }
+#          start_time_ready_state=$(date +%s)
+#          timeout_ready_state=120
+#
+#          while check_any_pod_not_ready datagrok; do
+#            current_time=$(date +%s)
+#            elapsed_time=$((current_time - start_time_ready_state))
+#            if (( elapsed_time >= timeout_ready_state )); then
+#                echo "Timeout reached. Not all pods are ready."
+#                exit 1
+#            fi
+#                echo "Not all pods are ready. Waiting..."
+#                echo "__________________________________"
+#                kubectl get pods -n datagrok
+#                sleep 30  # Adjust the delay as needed
+#          done
+#          echo "  _ _ _ _ _ _ _ _ _ _ _ "
+#          echo " |                     |"
+#          echo " | All pods are ready  |"
+#          echo " |_ _ _ _ _ _ _ _ _ _ _|"
+#          kubectl get pods -n datagrok
+
+      - name: Configure Git
         run: |
-          check_any_pod_not_running() {
-            local namespace=$1
-            while read -r pod status; do
-                if [[ "$status" != "Running" ]]; then
-                    return 0
-                fi
-            done < <(kubectl get pods -n datagrok --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.phase}{"\n"}{end}')
-            return 1
-          }
-          start_time_running_state=$(date +%s)
-          timeout_running_state=600
-          while check_any_pod_not_running datagrok; do
-            current_time=$(date +%s)
-            elapsed_time=$((current_time - start_time_running_state))
-            if (( elapsed_time >= timeout_running_state )); then
-                echo "Timeout reached. Not all pods are running."
-                exit 1
-            fi
-            echo "Not all pods are running. Waiting..."
-            echo "____________________________________"
-            kubectl get pods -n datagrok            
-            sleep 10  # Adjust the delay as needed
-          done  
-          echo "  _ _ _ _ _ _ _ _ _ _ _ _ "
-          echo " |                       |"
-          echo " | All pods are running  |"
-          echo " |_ _ _ _ _ _ _ _ _ _ _ _|"
-          kubectl get pods -n datagrok
-      - name: Check ready state
-        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
-        run: |
-          check_any_pod_not_ready() {
-              local namespace=$1
-              while read -r pod ready; do
-                  if [[ "$ready" != "True" ]]; then
-                      return 0
-                  fi
-              done < <(kubectl get pods -n datagrok --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[?(@.type=="Ready")]}{.status}{"\n"}{end}')
-              return 1
-          }
-          start_time_ready_state=$(date +%s)
-          timeout_ready_state=120
-          
-          while check_any_pod_not_ready datagrok; do
-            current_time=$(date +%s)
-            elapsed_time=$((current_time - start_time_ready_state))
-            if (( elapsed_time >= timeout_ready_state )); then
-                echo "Timeout reached. Not all pods are ready."
-                exit 1
-            fi
-                echo "Not all pods are ready. Waiting..."
-                echo "__________________________________"
-                kubectl get pods -n datagrok
-                sleep 30  # Adjust the delay as needed
-          done
-          echo "  _ _ _ _ _ _ _ _ _ _ _ "
-          echo " |                     |"
-          echo " | All pods are ready  |"
-          echo " |_ _ _ _ _ _ _ _ _ _ _|"
-          kubectl get pods -n datagrok
-      
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
       - name: Publish grok_connect
         if: steps.chart_changes.outputs.grok_connect == 'true'  
         run: |
           helm package datagrok_grok_connect -d charts/
-          #helm push
+          
           ls charts
       - name: Publish h2o
         if: steps.chart_changes.outputs.h2o == 'true'  
@@ -173,15 +179,20 @@ jobs:
         if: steps.chart_changes.outputs.jkg == 'true'  
         run: |
           helm package datagrok_jkg -d charts/
-          #helm push
-          ls charts
+          helm repo index charts
       - name: Publish jupyter_notebook
         if: steps.chart_changes.outputs.jn == 'true'  
         run: |
           helm package datagrok_jupyter_notebook -d charts/
           #helm push
           ls charts
-
+      - name: Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git add .
+          git commit -m "Bump version helm charts"
+          git push 
 
         
       
