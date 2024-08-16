@@ -1,0 +1,38 @@
+{{- if .Values.enabled -}}
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  {{- with .Values.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{ include "base.defaultLabels" . | nindent 4 }}
+  name: {{ include "base.fullname" . }}-{{ .Values.data_pvc.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - {{ .Values.cfg_pvc.accessModes | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.cfg_pvc.storage }}
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  {{- with .Values.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{ include "base.defaultLabels" . | nindent 4 }}
+  name: {{ include "base.fullname" . }}-{{ .Values.cfg_pvc.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - {{ .Values.cfg_pvc.accessModes | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.cfg_pvc.storage }}
+{{- end }}
