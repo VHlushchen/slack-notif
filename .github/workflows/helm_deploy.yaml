@@ -3,7 +3,7 @@ name: Build and Publish Helm Charts
 on:
   push:
     branches:
-      - main  # Only trigger on pushes to the main branch
+      - master  # Only trigger on pushes to the main branch
     paths:
       - 'base/**'  # Monitor changes in the base directory
 
