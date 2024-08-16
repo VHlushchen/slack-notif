@@ -19,46 +19,52 @@ jobs:
         uses: azure/setup-helm@v3
         with:
           version: v3.7.0  # Adjust the Helm version as needed
-
-      - name: Determine Changed Charts
-        id: changes
-        run: |
-          if git rev-parse HEAD^ >/dev/null 2>&1; then
-          CHANGED_CHARTS=$(git diff --name-only HEAD^ HEAD | grep '^base/' | awk -F'/' '{print $2}' | uniq)
-          else
-          CHANGED_CHARTS=$(git diff --name-only $(git rev-list --max-parents=0 HEAD) HEAD | grep '^base/' | awk -F'/' '{print $2}' | uniq)
-          fi
-          echo "changed_charts=$CHANGED_CHARTS" >> $GITHUB_ENV
-      - name: Build Helm Charts
-        if: env.changed_charts != ''
-        run: |
-          mkdir -p ./packages
-          for chart in ${{ env.changed_charts }}; do
-            echo "Building chart: $chart"
-            helm dependency update base/$chart
-            helm package base/$chart --destination ./charts
-          done
-          helm index charts
-
-      - name: Update Published Packages Info
-        if: env.changed_charts != ''
-        run: |
-          COMMIT_MESSAGE="Update published packages:"
-          for chart in ${{ env.changed_charts }}; do
-            CHART_VERSION=$(helm show chart base/$chart | grep version: | awk '{print $2}')
-            echo "Package: $chart" >> published-packages-info.txt
-            echo "Version: $CHART_VERSION" >> published-packages-info.txt
-            echo "Date: $(date -u)" >> published-packages-info.txt
-            echo "" >> published-packages-info.txt
-            COMMIT_MESSAGE="$COMMIT_MESSAGE $chart-$CHART_VERSION"
-          done
-          echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_ENV
-
-      - name: Commit and Push Changes
-        if: env.changed_charts != ''
-        run: |
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
-          git add published-packages-info.txt
-          git commit -m "${{ env.commit_message }}"
-          git push origin main
+      - name: Changes
+        id: changed-files
+        with:
+          files: 'packages/**'
+          separator: "\n"
+          dir_names: true
+          safe_output: false
+#      - name: Determine Changed Charts
+#        id: changes
+#        run: |
+#          if git rev-parse HEAD^ >/dev/null 2>&1; then
+#          CHANGED_CHARTS=$(git diff --name-only HEAD^ HEAD | grep '^base/' | awk -F'/' '{print $2}' | uniq)
+#          else
+#          CHANGED_CHARTS=$(git diff --name-only $(git rev-list --max-parents=0 HEAD) HEAD | grep '^base/' | awk -F'/' '{print $2}' | uniq)
+#          fi
+#          echo "changed_charts=$CHANGED_CHARTS" >> $GITHUB_ENV
+#      - name: Build Helm Charts
+#        if: env.changed_charts != ''
+#        run: |
+#          mkdir -p ./packages
+#          for chart in ${{ env.changed_charts }}; do
+#            echo "Building chart: $chart"
+#            helm dependency update base/$chart
+#            helm package base/$chart --destination ./charts
+#          done
+#          helm index charts
+#
+#      - name: Update Published Packages Info
+#        if: env.changed_charts != ''
+#        run: |
+#          COMMIT_MESSAGE="Update published packages:"
+#          for chart in ${{ env.changed_charts }}; do
+#            CHART_VERSION=$(helm show chart base/$chart | grep version: | awk '{print $2}')
+#            echo "Package: $chart" >> published-packages-info.txt
+#            echo "Version: $CHART_VERSION" >> published-packages-info.txt
+#            echo "Date: $(date -u)" >> published-packages-info.txt
+#            echo "" >> published-packages-info.txt
+#            COMMIT_MESSAGE="$COMMIT_MESSAGE $chart-$CHART_VERSION"
+#          done
+#          echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_ENV
+#
+#      - name: Commit and Push Changes
+#        if: env.changed_charts != ''
+#        run: |
+#          git config --local user.email "actions@github.com"
+#          git config --local user.name "GitHub Actions"
+#          git add published-packages-info.txt
+#          git commit -m "${{ env.commit_message }}"
+#          git push origin main

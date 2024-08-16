@@ -95,6 +95,13 @@ jobs:
           helm dependency update
           helm install datagrok-test . -f values.yaml -n datagrok --dry-run
           helm install datagrok-test . -f values.yaml -n datagrok
+      - name: Generate matrix
+        id: generate-matrix
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          CHANGED_PACKAGES="$(echo -e "${ALL_CHANGED_FILES}" | awk -F'/' '{print $2}' | sort -u)"
+          echo ${CHANGED_PACKAGES}
 #      - name: check running state
 #        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
 #        run: |
