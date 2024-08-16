@@ -3,7 +3,7 @@ entries:
   datagrok:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-05-16T14:35:38.013923818+03:00"
+    created: "2024-08-16T14:25:38.367105+03:00"
     description: A Helm chart for Kubernetes
     digest: 916cc52ce19022b3e21f13b2992342659916f2998bf1df69162309428792f911
     name: datagrok
@@ -14,7 +14,7 @@ entries:
   datagrok-test:
   - apiVersion: v2
     appVersion: 1.19.x
-    created: "2024-05-16T14:35:38.019262003+03:00"
+    created: "2024-08-16T14:25:38.369609+03:00"
     dependencies:
     - name: datagrok_grok_connect
       repository: '@datagrok'
@@ -37,7 +37,7 @@ entries:
     version: 1.0.3
   - apiVersion: v2
     appVersion: 1.16.0, 1.17.0
-    created: "2024-05-16T14:35:38.016807987+03:00"
+    created: "2024-08-16T14:25:38.368279+03:00"
     dependencies:
     - name: datagrok_grok_connect
       repository: file://charts/grok_connect/
@@ -51,7 +51,7 @@ entries:
     version: 1.0.2
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-05-16T14:35:38.015630602+03:00"
+    created: "2024-08-16T14:25:38.367648+03:00"
     description: A Helm chart for Kubernetes
     digest: 954a6592203ede412a27e1e8c44e1e4b943a417bb8e571a69d9c0fa477561f84
     name: datagrok-test
@@ -59,4 +59,16 @@ entries:
     urls:
     - datagrok-test-1.0.1.tgz
     version: 1.0.1
-generated: "2024-05-16T14:35:38.000634892+03:00"
+  datagrok_grok_spawner_test:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-08-16T14:25:38.372739+03:00"
+    description: A Helm chart for Kubernetes
+    digest: 93956b6b7ff82c1eb62c2c8f5b575fcb6dcd039facf9bfc8413b7672bb2e9b89
+    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
+    name: datagrok_grok_spawner_test
+    type: application
+    urls:
+    - datagrok_grok_spawner_test-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-08-16T14:25:38.366462+03:00"
