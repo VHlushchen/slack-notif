@@ -1,15 +1,15 @@
 dependencies:
 - name: datagrok_grok_connect_test
   repository: https://vhlushchen.github.io/slack-notif/charts/
-  version: 0.4.0
+  version: 0.5.0
 - name: datagrok_jkg-test
   repository: https://vhlushchen.github.io/slack-notif/charts/
-  version: 0.4.0
+  version: 0.5.0
 - name: datagrok_jupyter_notebook_test
   repository: https://vhlushchen.github.io/slack-notif/charts/
-  version: 0.4.0
+  version: 0.5.0
 - name: datagrok_grok_spawner_test
   repository: https://vhlushchen.github.io/slack-notif/charts/
-  version: 0.4.0
-digest: sha256:80b45e99087723871751980515e59f29492763161bae4d8a67fa6d0f712751b1
-generated: "2024-08-22T13:36:55.920694+03:00"
+  version: 0.5.0
+digest: sha256:fa20932951106ace8245bc1e2020d5a41929abc75ca309952deb48e41fbad931
+generated: "2024-08-22T10:43:27.107498736Z"
