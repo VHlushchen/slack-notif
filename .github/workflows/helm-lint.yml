@@ -92,12 +92,12 @@ jobs:
         run: |
           helm install jkg-test . -f values.yaml -n datagrok --dry-run
 #          helm install jkg-test . -f values.yaml -n datagrok
-      - name: deploy datagrok
-        if: steps.chart_changes.outputs.datagrok == 'true'
-        working-directory: ./base/datagrok-helm-chart
-        run: |
-          helm dependency update
-          helm install datagrok-test . -f values.yaml -n datagrok --dry-run
+#      - name: deploy datagrok
+#        if: steps.chart_changes.outputs.datagrok == 'true'
+#        working-directory: ./base/datagrok-helm-chart
+#        run: |
+#          helm dependency update
+#          helm install datagrok-test . -f values.yaml -n datagrok --dry-run
 #          helm install datagrok-test . -f values.yaml -n datagrok
 
 #      - name: check running state
@@ -168,25 +168,25 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-      - name: Publish grok_connect
+      - name: Publish grok_connect status
         if: steps.chart_changes.outputs.grok_connect_publish == 'true'
         run: |
           helm package ./base/datagrok_grok_connect -d charts/
-      - name: Publish grok_spawner
+      - name: Publish grok_spawner status
         if: steps.chart_changes.outputs.grok_spawner_publish == 'true'
         run: |
           helm package ./base/datagrok_grok_spawner -d charts/
           
           ls charts
-      - name: Publish jkg
+      - name: Publish jkg status
         if: steps.chart_changes.outputs.jkg_publish == 'true'
         run: |
           helm package ./base/datagrok_jkg -d charts/
-      - name: Publish datagrok
+      - name: Publish datagrok status
         if: steps.chart_changes.outputs.datagrok_publish == 'true'
         run: |
           helm package ./base/datagrok-helm-chart -d charts/
-      - name: Publish jupyter_notebook
+      - name: Publish jupyter_notebook status
         if: steps.chart_changes.outputs.jn_publish == 'true'
         run: |
           helm package ./base/datagrok_jupyter_notebook -d charts/
@@ -200,4 +200,3 @@ jobs:
           git push 
 
         
-      
