@@ -212,12 +212,12 @@ jobs:
         if: steps.chart_changes.outputs.datagrok == 'true'
         run: helm lint ./base/datagrok-helm-chart
 
-      - name: deploy datagrok
+      - name: datagrok dependency update
         if: steps.chart_changes.outputs.datagrok_publish == 'true'
         working-directory: ./base/datagrok-helm-chart
         run: |
           helm dependency update
-          helm package ./base/datagrok-helm-chart -d charts/
+          helm package . -d ../../charts/
       - name: Configure Git
         run: |
           git config user.name "GitHub Actions"
