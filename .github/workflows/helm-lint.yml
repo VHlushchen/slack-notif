@@ -1,4 +1,4 @@
-name: Helm lint
+name: Helm Deploy
 
 on:
   push:
@@ -53,14 +53,14 @@ jobs:
       - name: helm lint jupyter_notebook
         if: steps.chart_changes.outputs.jn == 'true'
         run: helm lint datagrok_jupyter_notebook       
-      - name: start minikube
-        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
-        id: minikube
-        uses: medyagh/setup-minikube@latest
-        with:
-          addons: registry,ingress
-          cache: false
-          driver: docker
+#      - name: start minikube
+#        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
+#        id: minikube
+#        uses: medyagh/setup-minikube@latest
+#        with:
+#          addons: registry,ingress
+#          cache: false
+#          driver: docker
       - name: Create namespace
         if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
         run: kubectl create namespace datagrok
@@ -69,39 +69,33 @@ jobs:
         working-directory: datagrok_grok_connect
         run: |
           helm install grok-connect-test . -f values.yaml -n datagrok --dry-run
-          helm install grok-connect-test . -f values.yaml -n datagrok
+#          helm install grok-connect-test . -f values.yaml -n datagrok
       - name: deploy h2o
         if: steps.chart_changes.outputs.h2o == 'true'
         working-directory: datagrok_h2o
         run: |
           helm install h2o-test . -f values.yaml -n datagrok --dry-run
-          helm install h2o-test . -f values.yaml -n datagrok
+#          helm install h2o-test . -f values.yaml -n datagrok
       - name: deploy jupyter notebook
         if: steps.chart_changes.outputs.jn == 'true'
         working-directory: datagrok_jupyter_notebook
         run: |
           helm install jupyter-notebook-test . -f values.yaml -n datagrok --dry-run
-          helm install jupyter-notebook-test . -f values.yaml -n datagrok
+#          helm install jupyter-notebook-test . -f values.yaml -n datagrok
       - name: deploy jkg
         if: steps.chart_changes.outputs.jkg == 'true'
         working-directory: datagrok_jkg
         run: |
           helm install jkg-test . -f values.yaml -n datagrok --dry-run
-          helm install jkg-test . -f values.yaml -n datagrok
+#          helm install jkg-test . -f values.yaml -n datagrok
       - name: deploy datagrok
         if: steps.chart_changes.outputs.jkg == 'true'
         working-directory: datagrok-helm-chart
         run: |
           helm dependency update
           helm install datagrok-test . -f values.yaml -n datagrok --dry-run
-          helm install datagrok-test . -f values.yaml -n datagrok
-      - name: Generate matrix
-        id: generate-matrix
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-        run: |
-          CHANGED_PACKAGES="$(echo -e "${ALL_CHANGED_FILES}" | awk -F'/' '{print $2}' | sort -u)"
-          echo ${CHANGED_PACKAGES}
+#          helm install datagrok-test . -f values.yaml -n datagrok
+
 #      - name: check running state
 #        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
 #        run: |
