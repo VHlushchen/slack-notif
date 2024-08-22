@@ -180,6 +180,12 @@ jobs:
           helm package ./base/datagrok_jupyter_notebook -d charts/
           #helm push
           ls charts
+      - name: Publish
+        run: |
+          helm repo index charts
+          git add .
+          git commit -m "Bump version helm charts"
+          git push 
       
 
   helm-lint-deploy-datagrok:
