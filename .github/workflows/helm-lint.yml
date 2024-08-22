@@ -219,7 +219,7 @@ jobs:
         working-directory: ./base/datagrok-helm-chart
         run: |
           helm dependency list
-          helm dependency update
+          helm dependency update --debug
       - name: helm package
         run: helm package ./base/datagrok-helm-chart -d charts/
       - name: Configure Git
