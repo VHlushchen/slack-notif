@@ -247,8 +247,8 @@ datagrok_grok_spawner:
   strategy_type: RollingUpdate
   container:
     name: grok-spawner
-    image: docker-registry.datagrok.ai/grok_spawner
-    tag: local
+    image: datagrok/grok_spawner
+    tag: latest
     port: 8000
     imagePullPolicy: Always
   service:
