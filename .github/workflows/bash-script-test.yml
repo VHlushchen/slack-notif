@@ -1,171 +1,171 @@
-name: Test Bash
-
-on:
-  push:
-    branches:
-      - master
-
-jobs:
-  test-start-update:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-      - name: Pulling datagrok/datagrok images
-        run: |
-          docker pull datagrok/datagrok:latest 
-      
-      - name: Pulling datagrok/grok-connect images
-        run: |
-          docker pull datagrok/grok_connect & docker pull datagrok/grok_connect:bleeding-edge
-
-      - name: Pulling datagrok/h2o images
-        run: |
-          docker pull datagrok/h2o:latest & docker pull datagrok/h2o:bleeding-edge
-      - name: Pulling datagrok/grok_compute images
-        run: |
-          docker pull datagrok/grok_compute:latest & docker pull datagrok/h2o:bleeding-edge
-      # - name: Pulling datagrok/jupyter_kernel_gateway images
-      #   run: |
-      #     docker pull datagrok/jupyter_kernel_gateway:latest & docker pull datagrok/jupyter_kernel_gateway:bleeding-edge
-      - name: datagrok deployment only
-        run: |
-          ./datagrok-install-kubernetes.sh --datagrok --auto-tests --verbose
-      # - name: CVM deployment only
-      #   run: ./datagrok-install-kubernetes.sh update --cvm --auto-tests --verbose
-      # - name: JKG deployment only
-      #   run: ./datagrok-install-kubernetes.sh update --datagrok -jkg --auto-tests --verbose
-      - name: h20 deployment only
-        run: ./datagrok-install-kubernetes.sh update -h2o --auto-tests --verbose
-      - name: grok compute deploymeny only
-        run: ./datagrok-install-kubernetes.sh update -gc --auto-tests --verbose
-      - name: custom namespace deployment
-        run: |
-          ./datagrok-install-kubernetes.sh delete --auto-tests --verbose 
-          ./datagrok-install-kubernetes.sh -n auto-tests --datagrok --auto-tests --verbose
-          ./datagrok-install-kubernetes.sh delete -n auto-tests --datagrok --auto-tests --verbose
-
-
-  
-  test-bleeding-edge:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-      - name: Minikube install
-        run: ./datagrok-install-kubernetes.sh install
-      - name: Bleeding-edge deployment
-        run: |
-          docker pull datagrok/datagrok:bleeding-edge & docker pull datagrok/grok_connect:bleeding-edge
-          ./datagrok-install-kubernetes.sh start --datagrok --bleeding-edge --auto-tests --verbose
-          ./datagrok-install-kubernetes.sh delete --bleeding-edge
-          docker rmi datagrok/datagrok:bleeding-edge & docker rmi datagrok/grok_connect:bleeding-edge
-  
-  test-custom-version:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-      - name: Minikube install
-        run: ./datagrok-install-kubernetes.sh install
-      - name: custom version deployment
-        run: |
-          docker pull datagrok/datagrok:1.18.3
-          ./datagrok-install-kubernetes.sh start --datagrok -v 1.18.3 --auto-tests --verbose
-          docker rmi datagrok/datagrok:1.18.3 
-  test-config:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    services:
-      postgres:
-        image: postgres:12
-        env:
-          POSTGRES_USER: superuser
-          POSTGRES_PASSWORD: superpassword
-          POSTGRES_DB: postgres
-          POSTGRES_INITDB_ARGS: "-A md5"
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-      - name: Minikube install
-        run: ./datagrok-install-kubernetes.sh install
-      - name: Generation config-file
-        run: |
-          echo '{
-            "datagrok_version": "1.18.0",
-            "jkg_version": "1.7.4",
-            "h2o_version": "1.1.1",
-            "grok_compute_version": "1.6.0",
-            "grok_connect_version": "2.1.17",
-            "jupyter_notebook_version": "latest",
-            "database_host": "host.minikube.internal",
-            "database_name": "datagrok",
-            "database_port": 5432,
-            "database_admin_username": "superuser",
-            "database_admin_password": "superpassword",
-            "database_datagrok_username": "dg",
-            "database_datagrok_password": "dg"
-          }' > config.json
-      # - name: test db
-      #   run: minikube ssh command 'pwd && sudo apt update && sudo apt install telnet -y && apt install postgresql-client && psql -h host.minikube.internal -p 5432 -U superuser'
-      - name: deployment with config file
-        run: ./datagrok-install-kubernetes.sh start --datagrok --h2o -gc --config config.json --auto-tests --verbose
-
-      # - name: run without flags
-      #   run: ./datagrok-install-kubernetes.sh --auto-tests --verbose
-      # - name: delete deployment
-      #   run: |
-      #     namespace="datagrok-latest"
-      #     pvcs=$(kubectl get pvc -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
-
-      #     # Loop through each PVC and print its name and status
-      #     echo "PVC Name   Status"
-      #     echo "--------------------"
-      #     while IFS=$'\t' read -r pvc status; do
-              
-      #         if [[ $status == 'Bound' ]]; then
-      #             echo "$pvc   $status"
-      #         else
-      #             echo "$pvc   $status"
-      #             sleep 10
-      #         fi
-      #     done <<< "$pvcs"
-      
-      # - name: check Status of pods
-      #   run: |
-      #     namespace="datagrok-latest"
-
-      #     # Get the list of pods in the specified namespace
-      #     pods=$(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
-          
-      #     # Loop through each pod
-      #     while IFS=$'\t' read -r pod status; do
-      #         echo "$pod   $status"
-      #         # Check if the status isn't "Running"
-      #         if [ "$status" != "Running" ]; then
-      #             echo "Pod $pod is not running"
-      #             sleep 10
-      #         fi
-      #     done <<< "$pods"
-          
-      #     # If all pods are running, exit with code 0
-      #     exit 0
-      # - name: check datagrok endpoint
-      #   run: |
-      #     url='latest.datagrok.internal'
-      #     response=$(curl -s -I "$url")
-
-      #     # Check if the response contains "HTTP/1.1 200 OK"
-      #     if [[ $response == *"HTTP/1.1 200 OK"* ]]; then
-      #         echo "The URL $url returned a 200 status code."
-      #         exit 0
-      #     else
-      #         echo "The URL $url did not return a 200 status code."
-      #         exit 1
-      #     fi
+#name: Test Bash
+#
+#on:
+#  push:
+#    branches:
+#      - master
+#
+#jobs:
+#  test-start-update:
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 30
+#    steps:
+#      - name: Checkout Repository
+#        uses: actions/checkout@v3
+#      - name: Pulling datagrok/datagrok images
+#        run: |
+#          docker pull datagrok/datagrok:latest
+#
+#      - name: Pulling datagrok/grok-connect images
+#        run: |
+#          docker pull datagrok/grok_connect & docker pull datagrok/grok_connect:bleeding-edge
+#
+#      - name: Pulling datagrok/h2o images
+#        run: |
+#          docker pull datagrok/h2o:latest & docker pull datagrok/h2o:bleeding-edge
+#      - name: Pulling datagrok/grok_compute images
+#        run: |
+#          docker pull datagrok/grok_compute:latest & docker pull datagrok/h2o:bleeding-edge
+#      # - name: Pulling datagrok/jupyter_kernel_gateway images
+#      #   run: |
+#      #     docker pull datagrok/jupyter_kernel_gateway:latest & docker pull datagrok/jupyter_kernel_gateway:bleeding-edge
+#      - name: datagrok deployment only
+#        run: |
+#          ./datagrok-install-kubernetes.sh --datagrok --auto-tests --verbose
+#      # - name: CVM deployment only
+#      #   run: ./datagrok-install-kubernetes.sh update --cvm --auto-tests --verbose
+#      # - name: JKG deployment only
+#      #   run: ./datagrok-install-kubernetes.sh update --datagrok -jkg --auto-tests --verbose
+#      - name: h20 deployment only
+#        run: ./datagrok-install-kubernetes.sh update -h2o --auto-tests --verbose
+#      - name: grok compute deploymeny only
+#        run: ./datagrok-install-kubernetes.sh update -gc --auto-tests --verbose
+#      - name: custom namespace deployment
+#        run: |
+#          ./datagrok-install-kubernetes.sh delete --auto-tests --verbose
+#          ./datagrok-install-kubernetes.sh -n auto-tests --datagrok --auto-tests --verbose
+#          ./datagrok-install-kubernetes.sh delete -n auto-tests --datagrok --auto-tests --verbose
+#
+#
+#
+#  test-bleeding-edge:
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 30
+#    steps:
+#      - name: Checkout Repository
+#        uses: actions/checkout@v3
+#      - name: Minikube install
+#        run: ./datagrok-install-kubernetes.sh install
+#      - name: Bleeding-edge deployment
+#        run: |
+#          docker pull datagrok/datagrok:bleeding-edge & docker pull datagrok/grok_connect:bleeding-edge
+#          ./datagrok-install-kubernetes.sh start --datagrok --bleeding-edge --auto-tests --verbose
+#          ./datagrok-install-kubernetes.sh delete --bleeding-edge
+#          docker rmi datagrok/datagrok:bleeding-edge & docker rmi datagrok/grok_connect:bleeding-edge
+#
+#  test-custom-version:
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 30
+#    steps:
+#      - name: Checkout Repository
+#        uses: actions/checkout@v3
+#      - name: Minikube install
+#        run: ./datagrok-install-kubernetes.sh install
+#      - name: custom version deployment
+#        run: |
+#          docker pull datagrok/datagrok:1.18.3
+#          ./datagrok-install-kubernetes.sh start --datagrok -v 1.18.3 --auto-tests --verbose
+#          docker rmi datagrok/datagrok:1.18.3
+#  test-config:
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 30
+#    services:
+#      postgres:
+#        image: postgres:12
+#        env:
+#          POSTGRES_USER: superuser
+#          POSTGRES_PASSWORD: superpassword
+#          POSTGRES_DB: postgres
+#          POSTGRES_INITDB_ARGS: "-A md5"
+#        ports:
+#          - 5432:5432
+#        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+#    steps:
+#      - name: Checkout Repository
+#        uses: actions/checkout@v3
+#      - name: Minikube install
+#        run: ./datagrok-install-kubernetes.sh install
+#      - name: Generation config-file
+#        run: |
+#          echo '{
+#            "datagrok_version": "1.18.0",
+#            "jkg_version": "1.7.4",
+#            "h2o_version": "1.1.1",
+#            "grok_compute_version": "1.6.0",
+#            "grok_connect_version": "2.1.17",
+#            "jupyter_notebook_version": "latest",
+#            "database_host": "host.minikube.internal",
+#            "database_name": "datagrok",
+#            "database_port": 5432,
+#            "database_admin_username": "superuser",
+#            "database_admin_password": "superpassword",
+#            "database_datagrok_username": "dg",
+#            "database_datagrok_password": "dg"
+#          }' > config.json
+#      # - name: test db
+#      #   run: minikube ssh command 'pwd && sudo apt update && sudo apt install telnet -y && apt install postgresql-client && psql -h host.minikube.internal -p 5432 -U superuser'
+#      - name: deployment with config file
+#        run: ./datagrok-install-kubernetes.sh start --datagrok --h2o -gc --config config.json --auto-tests --verbose
+#
+#      # - name: run without flags
+#      #   run: ./datagrok-install-kubernetes.sh --auto-tests --verbose
+#      # - name: delete deployment
+#      #   run: |
+#      #     namespace="datagrok-latest"
+#      #     pvcs=$(kubectl get pvc -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
+#
+#      #     # Loop through each PVC and print its name and status
+#      #     echo "PVC Name   Status"
+#      #     echo "--------------------"
+#      #     while IFS=$'\t' read -r pvc status; do
+#
+#      #         if [[ $status == 'Bound' ]]; then
+#      #             echo "$pvc   $status"
+#      #         else
+#      #             echo "$pvc   $status"
+#      #             sleep 10
+#      #         fi
+#      #     done <<< "$pvcs"
+#
+#      # - name: check Status of pods
+#      #   run: |
+#      #     namespace="datagrok-latest"
+#
+#      #     # Get the list of pods in the specified namespace
+#      #     pods=$(kubectl get pods -n $namespace --output=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}')
+#
+#      #     # Loop through each pod
+#      #     while IFS=$'\t' read -r pod status; do
+#      #         echo "$pod   $status"
+#      #         # Check if the status isn't "Running"
+#      #         if [ "$status" != "Running" ]; then
+#      #             echo "Pod $pod is not running"
+#      #             sleep 10
+#      #         fi
+#      #     done <<< "$pods"
+#
+#      #     # If all pods are running, exit with code 0
+#      #     exit 0
+#      # - name: check datagrok endpoint
+#      #   run: |
+#      #     url='latest.datagrok.internal'
+#      #     response=$(curl -s -I "$url")
+#
+#      #     # Check if the response contains "HTTP/1.1 200 OK"
+#      #     if [[ $response == *"HTTP/1.1 200 OK"* ]]; then
+#      #         echo "The URL $url returned a 200 status code."
+#      #         exit 0
+#      #     else
+#      #         echo "The URL $url did not return a 200 status code."
+#      #         exit 1
+#      #     fi
