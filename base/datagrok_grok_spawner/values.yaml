@@ -5,7 +5,7 @@ labels:
 strategy_type: RollingUpdate
 container:
   name: grok-spawner
-  image: nexus.datagrok.ai/grok_spawner
+  image: datagrok/grok_spawner
   tag: latest
   port: 8000
   imagePullPolicy:

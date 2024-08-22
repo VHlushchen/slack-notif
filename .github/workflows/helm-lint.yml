@@ -198,6 +198,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GH_TOKEN }}
+      - name: Git pull changes
+        run: git pull
       - name: Add helm repo
         run: helm repo add datagrok-test https://vhlushchen.github.io/slack-notif/charts/
       - uses: dorny/paths-filter@v3
