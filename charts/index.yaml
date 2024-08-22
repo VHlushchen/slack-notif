@@ -1,102 +1,9 @@
 apiVersion: v1
 entries:
-  datagrok:
-  - apiVersion: v2
-    appVersion: 1.0.0
-    created: "2024-08-22T10:47:32.276652086Z"
-    description: A Helm chart for Kubernetes
-    digest: 916cc52ce19022b3e21f13b2992342659916f2998bf1df69162309428792f911
-    name: datagrok
-    type: application
-    urls:
-    - datagrok-1.0.1.tgz
-    version: 1.0.1
-  datagrok-test:
-  - apiVersion: v2
-    appVersion: 1.19.x
-    created: "2024-08-22T10:47:32.293088459Z"
-    dependencies:
-    - name: datagrok_grok_connect_test
-      repository: '@datagrok-test'
-      version: 0.4.0
-    - name: datagrok_jkg-test
-      repository: '@datagrok-test'
-      version: 0.4.0
-    - name: datagrok_jupyter_notebook_test
-      repository: '@datagrok-test'
-      version: 0.4.0
-    - name: datagrok_grok_spawner_test
-      repository: '@datagrok-test'
-      version: 0.4.0
-    description: A Helm chart for Kubernetes
-    digest: 71721174500898733cfd91659482518b8fcd2c62a84ae7dfecb85a19e96d9841
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok-test
-    type: application
-    urls:
-    - datagrok-test-1.0.6.tgz
-    version: 1.0.6
-  - apiVersion: v2
-    appVersion: 1.19.x
-    created: "2024-08-22T10:47:32.286539825Z"
-    dependencies:
-    - name: datagrok_grok_connect
-      repository: '@datagrok'
-      version: 0.2.0
-    - name: datagrok_h2o
-      repository: '@datagrok'
-      version: 0.2.0
-    - name: datagrok_jkg
-      repository: '@datagrok'
-      version: 0.3.0
-    - name: datagrok_jupyter_notebook
-      repository: '@datagrok'
-      version: 0.2.0
-    description: A Helm chart for Kubernetes
-    digest: 19527d4b1ce3b5b030850ee50db3a7449fe3bff366da2dbb912d764566be3074
-    name: datagrok-test
-    type: application
-    urls:
-    - datagrok-test-1.0.3.tgz
-    version: 1.0.3
-  - apiVersion: v2
-    appVersion: 1.19.x
-    created: "2024-08-22T10:47:32.284940637Z"
-    dependencies:
-    - name: datagrok_grok_connect_test
-      repository: '@datagrok-test'
-      version: 0.5.0
-    - name: datagrok_jkg-test
-      repository: '@datagrok-test'
-      version: 0.5.0
-    - name: datagrok_jupyter_notebook_test
-      repository: '@datagrok-test'
-      version: 0.5.0
-    - name: datagrok_grok_spawner_test
-      repository: '@datagrok-test'
-      version: 0.5.0
-    description: A Helm chart for Kubernetes
-    digest: cc946f63589444f4803cf40408eb01c96e9b48bf385dcbd5556afc19d5c51cf2
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok-test
-    type: application
-    urls:
-    - datagrok-test-1.0.2.tgz
-    version: 1.0.2
-  - apiVersion: v2
-    appVersion: 1.0.0
-    created: "2024-08-22T10:47:32.277739481Z"
-    description: A Helm chart for Kubernetes
-    digest: 954a6592203ede412a27e1e8c44e1e4b943a417bb8e571a69d9c0fa477561f84
-    name: datagrok-test
-    type: application
-    urls:
-    - datagrok-test-1.0.1.tgz
-    version: 1.0.1
   datagrok_grok_connect_test:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.294308662Z"
+    created: "2024-08-22T10:54:10.782456833Z"
     description: A Helm chart for Kubernetes
     digest: fb6c8bd61449fe006cd43a32b8e5484fb80b618f54c0c2f463ba36e54cda8ed9
     icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
@@ -107,52 +14,19 @@ entries:
     version: 0.6.0
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.294051423Z"
+    created: "2024-08-22T10:54:10.782202588Z"
     description: A Helm chart for Kubernetes
-    digest: 324ec5438c6beedb96268e23775e652c01f96446ecc8cc75458bdefcea18a5df
+    digest: 80b1c45eec4ba5824d8ae5ceae30f58b209badc6ea1a67decb82c492f7376166
     icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
     name: datagrok_grok_connect_test
     type: application
     urls:
-    - datagrok_grok_connect_test-0.5.0.tgz
-    version: 0.5.0
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.293761473Z"
-    description: A Helm chart for Kubernetes
-    digest: 373539090d1e697cede0ce1ac668b1020431b051d0d981c04dabb74ca35f0be5
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_grok_connect_test
-    type: application
-    urls:
-    - datagrok_grok_connect_test-0.4.0.tgz
-    version: 0.4.0
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.293527387Z"
-    description: A Helm chart for Kubernetes
-    digest: 256c84f4232af10b5c627a35a4c63bf653f2c5608386dd8de96800db87d18dc2
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_grok_connect_test
-    type: application
-    urls:
-    - datagrok_grok_connect_test-0.3.0.tgz
-    version: 0.3.0
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.293316264Z"
-    description: A Helm chart for Kubernetes
-    digest: 50af49fc7f88dd300f6b2eba42f159aafd97dd08c71a5967a03f0a3bd334d737
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_grok_connect_test
-    type: application
-    urls:
-    - datagrok_grok_connect_test-0.2.0.tgz
-    version: 0.2.0
+    - datagrok_grok_connect_test-0.1.0.tgz
+    version: 0.1.0
   datagrok_grok_spawner_test:
   - apiVersion: v2
     appVersion: 1.19.0
-    created: "2024-08-22T10:47:32.322502891Z"
+    created: "2024-08-22T10:54:10.7921766Z"
     dependencies:
     - name: minio
       repository: ""
@@ -167,73 +41,13 @@ entries:
     version: 0.6.0
   - apiVersion: v2
     appVersion: 1.19.0
-    created: "2024-08-22T10:47:32.318011888Z"
+    created: "2024-08-22T10:54:10.787645283Z"
     dependencies:
     - name: minio
       repository: ""
       version: 14.6.22
     description: A Helm chart for Kubernetes
-    digest: b8aeef3cea9956b9450ff2c5d4a4a6485f4a75071235e272aad3b1ed0021e34b
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_grok_spawner_test
-    type: application
-    urls:
-    - datagrok_grok_spawner_test-0.5.0.tgz
-    version: 0.5.0
-  - apiVersion: v2
-    appVersion: 1.19.0
-    created: "2024-08-22T10:47:32.312665473Z"
-    dependencies:
-    - name: minio
-      repository: ""
-      version: 14.6.22
-    description: A Helm chart for Kubernetes
-    digest: 8c15eb60e33dd52b99622d0a1c2641d48f0b990c62f7548d13f8f4a15ba33358
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_grok_spawner_test
-    type: application
-    urls:
-    - datagrok_grok_spawner_test-0.4.0.tgz
-    version: 0.4.0
-  - apiVersion: v2
-    appVersion: 1.19.0
-    created: "2024-08-22T10:47:32.308301518Z"
-    dependencies:
-    - name: minio
-      repository: ""
-      version: 14.6.22
-    description: A Helm chart for Kubernetes
-    digest: b0efb86f08045f530503eac23590c1cabc0074e1f707b6e7b9d34e56e42a4fb8
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_grok_spawner_test
-    type: application
-    urls:
-    - datagrok_grok_spawner_test-0.3.0.tgz
-    version: 0.3.0
-  - apiVersion: v2
-    appVersion: 1.19.0
-    created: "2024-08-22T10:47:32.303639568Z"
-    dependencies:
-    - name: minio
-      repository: ""
-      version: 14.6.22
-    description: A Helm chart for Kubernetes
-    digest: dd7ffc32912d0e2d395e1c89621d3aa73b2dc8febbe3d33846bb70d6d9596151
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_grok_spawner_test
-    type: application
-    urls:
-    - datagrok_grok_spawner_test-0.2.0.tgz
-    version: 0.2.0
-  - apiVersion: v2
-    appVersion: 1.19.0
-    created: "2024-08-22T10:47:32.299138106Z"
-    dependencies:
-    - name: minio
-      repository: ""
-      version: 14.6.22
-    description: A Helm chart for Kubernetes
-    digest: b6072f9360f996c85d0b3d08583e2407acac18557bf6f43ae67bf1eabf70a2e3
+    digest: 95d5a4f015d02d769c17ca34cc08fd3e271d22cd6d211cbfe72a7f0006d34b58
     icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
     name: datagrok_grok_spawner_test
     type: application
@@ -243,7 +57,7 @@ entries:
   datagrok_jkg-test:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.327053705Z"
+    created: "2024-08-22T10:54:10.792747306Z"
     description: A Helm chart for Kubernetes
     digest: 9e7666d28ce94c7c1ef4522cadd2e92a0df0080548bb541db97e0eb28052e862
     icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
@@ -254,52 +68,19 @@ entries:
     version: 0.6.0
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.325297395Z"
+    created: "2024-08-22T10:54:10.792464177Z"
     description: A Helm chart for Kubernetes
-    digest: fc8717b7279c27415acd72a8144ec44cbc6f23fb70665288b3f6070449b8c044
+    digest: 119bd85c471bd12a6b7a1b0ff806c2fe6c7f47a9a1f0962ba4a99584896b8674
     icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
     name: datagrok_jkg-test
     type: application
     urls:
-    - datagrok_jkg-test-0.5.0.tgz
-    version: 0.5.0
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.324361773Z"
-    description: A Helm chart for Kubernetes
-    digest: 44af35169a94d398df3a76920a2905a16e165dcdffb6b71ddfd39ad9ff35e779
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_jkg-test
-    type: application
-    urls:
-    - datagrok_jkg-test-0.4.0.tgz
-    version: 0.4.0
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.323401264Z"
-    description: A Helm chart for Kubernetes
-    digest: d59be6859c84faa58c3eb21abf2dc5a0cb5f1a314d4208d3e63fd1522a4c4a8d
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_jkg-test
-    type: application
-    urls:
-    - datagrok_jkg-test-0.3.0.tgz
-    version: 0.3.0
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.32291609Z"
-    description: A Helm chart for Kubernetes
-    digest: 0b05e387ea0363234e79468b27619d3c00e9b25a99c8b5de7f7dc19f5ee5cbb8
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_jkg-test
-    type: application
-    urls:
-    - datagrok_jkg-test-0.2.0.tgz
-    version: 0.2.0
+    - datagrok_jkg-test-0.1.0.tgz
+    version: 0.1.0
   datagrok_jupyter_notebook_test:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.328574447Z"
+    created: "2024-08-22T10:54:10.793213206Z"
     description: A Helm chart for Kubernetes
     digest: f1bbdd30461dec1cfbe49b367ecf52ffe8b70f9f85e96932a6d93c5c77bb21a2
     icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
@@ -310,46 +91,13 @@ entries:
     version: 0.6.0
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.32835076Z"
+    created: "2024-08-22T10:54:10.792982305Z"
     description: A Helm chart for Kubernetes
-    digest: 5c047f9bd25cffb064138e3af0b3c96eabf9ced78562055693bd336d5ec78080
+    digest: 09a33d494d08d24e57e17f2ff75365dd09c2221a91e9652d809dcc07991707b5
     icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
     name: datagrok_jupyter_notebook_test
     type: application
     urls:
-    - datagrok_jupyter_notebook_test-0.5.0.tgz
-    version: 0.5.0
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.328122395Z"
-    description: A Helm chart for Kubernetes
-    digest: 106356f2cc377a9a23112ed332c64d8dc592b963f908a16217c8ee6b01ee12b6
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_jupyter_notebook_test
-    type: application
-    urls:
-    - datagrok_jupyter_notebook_test-0.4.0.tgz
-    version: 0.4.0
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.327873712Z"
-    description: A Helm chart for Kubernetes
-    digest: da709bd55e74f4dad00b48435e895a5da336969e7d9f98892f6cf8bb22560d65
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_jupyter_notebook_test
-    type: application
-    urls:
-    - datagrok_jupyter_notebook_test-0.3.0.tgz
-    version: 0.3.0
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2024-08-22T10:47:32.327385032Z"
-    description: A Helm chart for Kubernetes
-    digest: 920c55f5acb025d6610bbbe10f8acd204065a6900af620bc36db508954402f1a
-    icon: https://awsmp-logos.s3.amazonaws.com/seller-rd56pvqdccmwk/d29ebfef5392118b01bee04677722cae.png
-    name: datagrok_jupyter_notebook_test
-    type: application
-    urls:
-    - datagrok_jupyter_notebook_test-0.2.0.tgz
-    version: 0.2.0
-generated: "2024-08-22T10:47:32.275531759Z"
+    - datagrok_jupyter_notebook_test-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-08-22T10:54:10.781675002Z"
