@@ -53,14 +53,14 @@ jobs:
       - name: helm lint jupyter_notebook
         if: steps.chart_changes.outputs.jn == 'true'
         run: helm lint datagrok_jupyter_notebook       
-#      - name: start minikube
-#        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
-#        id: minikube
-#        uses: medyagh/setup-minikube@latest
-#        with:
-#          addons: registry,ingress
-#          cache: false
-#          driver: docker
+      - name: start minikube
+        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
+        id: minikube
+        uses: medyagh/setup-minikube@latest
+        with:
+          addons: registry,ingress
+          cache: false
+          driver: docker
 #      - name: Create namespace
 #        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
 #        run: kubectl create namespace datagrok
