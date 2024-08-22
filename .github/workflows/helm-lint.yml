@@ -218,6 +218,7 @@ jobs:
         if: steps.chart_changes.outputs.datagrok_publish == 'true'
         working-directory: ./base/datagrok-helm-chart
         run: |
+          sleep 60
           helm dependency list
           helm repo update
           helm dependency update --debug
