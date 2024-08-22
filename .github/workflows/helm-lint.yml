@@ -56,7 +56,7 @@ jobs:
         if: steps.chart_changes.outputs.jn == 'true'
         run: helm lint ./base/datagrok_jupyter_notebook
       - name: start minikube
-        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
+        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true' || steps.chart_changes.outputs.grok_spawner == 'true'
         id: minikube
         uses: medyagh/setup-minikube@latest
         with:
