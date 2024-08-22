@@ -25,7 +25,7 @@ version: 1.0.1
 appVersion: "1.19.x"
 dependencies:
  - name: datagrok_grok_connect_test
-   version: 0.5.0
+   version: 0.6.0
    repository: "@datagrok-test"
  - name: datagrok_jkg-test
    version: 0.1.0
