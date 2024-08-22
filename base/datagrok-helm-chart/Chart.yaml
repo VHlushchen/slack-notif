@@ -25,15 +25,15 @@ version: 1.0.6
 appVersion: "1.19.x"
 dependencies:
  - name: datagrok_grok_connect_test
-   version: 0.3.0
+   version: 0.4.0
    repository: "@datagrok-test"
  - name: datagrok_jkg-test
-   version: 0.3.0
+   version: 0.4.0
    repository: "@datagrok-test"
  - name: datagrok_jupyter_notebook_test
-   version: 0.3.0
+   version: 0.4.0
    repository: "@datagrok-test"
  - name: datagrok_grok_spawner_test
-   version: 0.3.0
+   version: 0.4.0
    repository: "@datagrok-test"
 
