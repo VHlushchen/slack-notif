@@ -41,7 +41,6 @@ jobs:
               - 'base/datagrok_jupyter_notebook/Chart.yaml'
             
 
-        run: helm lint ./base/datagrok-helm-chart
       - name: grok_connect lint
         if: steps.chart_changes.outputs.grok_connect == 'true'
         run: helm lint ./base/datagrok_grok_connect
@@ -204,6 +203,8 @@ jobs:
               - 'base/datagrok-helm-chart/Chart.yaml'
       - name: datagrok lint
         if: steps.chart_changes.outputs.datagrok == 'true'
+        run: helm lint ./base/datagrok-helm-chart
+
       - name: deploy datagrok
         if: steps.chart_changes.outputs.datagrok_publish == 'true'
         working-directory: ./base/datagrok-helm-chart
