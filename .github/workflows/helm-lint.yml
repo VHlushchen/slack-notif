@@ -164,6 +164,7 @@ jobs:
         if: steps.chart_changes.outputs.grok_connect_publish == 'true'
         run: |
           helm package ./base/datagrok_grok_connect -d charts/
+          helm package ./base/datagrok_grok_connect -d ./base/datagrok-helm-chart/charts
       - name: Publish grok_spawner status
         if: steps.chart_changes.outputs.grok_spawner_publish == 'true'
         run: |
