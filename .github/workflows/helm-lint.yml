@@ -18,96 +18,97 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-      - name: Add helm repo
-        run: helm repo add datagrok-test https://vhlushchen.github.io/slack-notif/charts/
-      - uses: dorny/paths-filter@v3
-        id:  chart_changes
-        with:
-          filters: |
-            grok_connect:
-              - 'base/datagrok_grok_connect/**'
-            grok_spawner:
-              - 'base/datagrok_grok_spawner/**'
-            jkg:
-              - 'base/datagrok_jkg/**'
-            jn:
-              - 'base/datagrok_jupyter_notebook/**'
-            grok_connect_publish:
-              - 'base/datagrok_grok_connect/Chart.yaml'
-            grok_spawner_publish:
-              - 'base/datagrok_grok_spawner/Chart.yaml'
-            jkg_publish:
-              - 'base/datagrok_jkg/Chart.yaml'
-            jn_publish:
-              - 'base/datagrok_jupyter_notebook/Chart.yaml'
-            
-
-      - name: grok_connect lint
-        if: steps.chart_changes.outputs.grok_connect == 'true'
-        run: helm lint ./base/datagrok_grok_connect
-      - name: grok_spawner lint
-        if: steps.chart_changes.outputs.grok_spawner == 'true'
-        run: helm lint ./base/datagrok_grok_spawner
-      - name: helm lint jkg
-        if: steps.chart_changes.outputs.jkg == 'true'
-        run: helm lint ./base/datagrok_jkg
-      - name: helm lint jupyter_notebook
-        if: steps.chart_changes.outputs.jn == 'true'
-        run: helm lint ./base/datagrok_jupyter_notebook
-      - name: start minikube
-        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true' || steps.chart_changes.outputs.grok_spawner == 'true'
-        id: minikube
-        uses: medyagh/setup-minikube@latest
-        with:
-          addons: registry,ingress
-          cache: false
-          driver: docker
-      - name: deploy grok connect
-        if: steps.chart_changes.outputs.grok_connect == 'true'
-        working-directory: ./base/datagrok_grok_connect
-        run: |
-          helm install grok-connect-test . -f values.yaml -n datagrok --dry-run
-      - name: deploy grok spawner
-        if: steps.chart_changes.outputs.grok_spawner == 'true'
-        working-directory: ./base/datagrok_grok_spawner
-        run: |
-          helm install grok-connect-test . -f values.yaml -n datagrok --dry-run
-      - name: deploy jupyter notebook
-        if: steps.chart_changes.outputs.jn == 'true'
-        working-directory: ./base/datagrok_jupyter_notebook
-        run: |
-          helm install jupyter-notebook-test . -f values.yaml -n datagrok --dry-run
-      - name: deploy jkg
-        if: steps.chart_changes.outputs.jkg == 'true'
-        working-directory: ./base/datagrok_jkg
-        run: |
-          helm install jkg-test . -f values.yaml -n datagrok --dry-run
-      - name: Configure Git
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-      - name: Publish grok_connect status
-        if: steps.chart_changes.outputs.grok_connect_publish == 'true'
-        run: |
-          helm package ./base/datagrok_grok_connect -d charts/
-      - name: Publish grok_spawner status
-        if: steps.chart_changes.outputs.grok_spawner_publish == 'true'
-        run: |
-          helm package ./base/datagrok_grok_spawner -d charts/
-      - name: Publish jkg status
-        if: steps.chart_changes.outputs.jkg_publish == 'true'
-        run: |
-          helm package ./base/datagrok_jkg -d charts/
-      - name: Publish jupyter_notebook status
-        if: steps.chart_changes.outputs.jn_publish == 'true'
-        run: |
-          helm package ./base/datagrok_jupyter_notebook -d charts/
+#        with:
+#          token: ${{ secrets.GH_TOKEN }}
+#      - name: Add helm repo
+#        run: helm repo add datagrok-test https://vhlushchen.github.io/slack-notif/charts/
+#      - uses: dorny/paths-filter@v3
+#        id:  chart_changes
+#        with:
+#          filters: |
+#            grok_connect:
+#              - 'base/datagrok_grok_connect/**'
+#            grok_spawner:
+#              - 'base/datagrok_grok_spawner/**'
+#            jkg:
+#              - 'base/datagrok_jkg/**'
+#            jn:
+#              - 'base/datagrok_jupyter_notebook/**'
+#            grok_connect_publish:
+#              - 'base/datagrok_grok_connect/Chart.yaml'
+#            grok_spawner_publish:
+#              - 'base/datagrok_grok_spawner/Chart.yaml'
+#            jkg_publish:
+#              - 'base/datagrok_jkg/Chart.yaml'
+#            jn_publish:
+#              - 'base/datagrok_jupyter_notebook/Chart.yaml'
+#
+#
+#      - name: grok_connect lint
+#        if: steps.chart_changes.outputs.grok_connect == 'true'
+#        run: helm lint ./base/datagrok_grok_connect
+#      - name: grok_spawner lint
+#        if: steps.chart_changes.outputs.grok_spawner == 'true'
+#        run: helm lint ./base/datagrok_grok_spawner
+#      - name: helm lint jkg
+#        if: steps.chart_changes.outputs.jkg == 'true'
+#        run: helm lint ./base/datagrok_jkg
+#      - name: helm lint jupyter_notebook
+#        if: steps.chart_changes.outputs.jn == 'true'
+#        run: helm lint ./base/datagrok_jupyter_notebook
+#      - name: start minikube
+#        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true' || steps.chart_changes.outputs.grok_spawner == 'true'
+#        id: minikube
+#        uses: medyagh/setup-minikube@latest
+#        with:
+#          addons: registry,ingress
+#          cache: false
+#          driver: docker
+#      - name: deploy grok connect
+#        if: steps.chart_changes.outputs.grok_connect == 'true'
+#        working-directory: ./base/datagrok_grok_connect
+#        run: |
+#          helm install grok-connect-test . -f values.yaml -n datagrok --dry-run
+#      - name: deploy grok spawner
+#        if: steps.chart_changes.outputs.grok_spawner == 'true'
+#        working-directory: ./base/datagrok_grok_spawner
+#        run: |
+#          helm install grok-connect-test . -f values.yaml -n datagrok --dry-run
+#      - name: deploy jupyter notebook
+#        if: steps.chart_changes.outputs.jn == 'true'
+#        working-directory: ./base/datagrok_jupyter_notebook
+#        run: |
+#          helm install jupyter-notebook-test . -f values.yaml -n datagrok --dry-run
+#      - name: deploy jkg
+#        if: steps.chart_changes.outputs.jkg == 'true'
+#        working-directory: ./base/datagrok_jkg
+#        run: |
+#          helm install jkg-test . -f values.yaml -n datagrok --dry-run
+#      - name: Configure Git
+#        run: |
+#          git config user.name "GitHub Actions"
+#          git config user.email "actions@github.com"
+#      - name: Publish grok_connect status
+#        if: steps.chart_changes.outputs.grok_connect_publish == 'true'
+#        run: |
+#          helm package ./base/datagrok_grok_connect -d charts/
+#      - name: Publish grok_spawner status
+#        if: steps.chart_changes.outputs.grok_spawner_publish == 'true'
+#        run: |
+#          helm package ./base/datagrok_grok_spawner -d charts/
+#      - name: Publish jkg status
+#        if: steps.chart_changes.outputs.jkg_publish == 'true'
+#        run: |
+#          helm package ./base/datagrok_jkg -d charts/
+#      - name: Publish jupyter_notebook status
+#        if: steps.chart_changes.outputs.jn_publish == 'true'
+#        run: |
+#          helm package ./base/datagrok_jupyter_notebook -d charts/
       - name: Publish
-        if: steps.chart_changes.outputs.jkg_publish == 'true' || steps.chart_changes.outputs.jn_publish == 'true' || steps.chart_changes.outputs.grok_connect_publish == 'true' || steps.chart_changes.outputs.grok_spawner_publish == 'true'
+#        if: steps.chart_changes.outputs.jkg_publish == 'true' || steps.chart_changes.outputs.jn_publish == 'true' || steps.chart_changes.outputs.grok_connect_publish == 'true' || steps.chart_changes.outputs.grok_spawner_publish == 'true'
         run: |
-          helm repo index charts
+#          helm repo index charts
+          touch test-123
           git add .
           git commit -m "Bump version helm charts"
           git push 
