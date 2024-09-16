@@ -7,6 +7,10 @@ on:
     paths:
       - 'base/**'
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
   helm-lint-deploy-packages:
     runs-on: ubuntu-latest
@@ -30,7 +34,6 @@ jobs:
               - 'base/datagrok_jkg/**'
             jn:
               - 'base/datagrok_jupyter_notebook/**'
-            
             grok_connect_publish:
               - 'base/datagrok_grok_connect/Chart.yaml'
             grok_spawner_publish:
@@ -61,101 +64,26 @@ jobs:
           addons: registry,ingress
           cache: false
           driver: docker
-#      - name: Create namespace
-#        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
-#        run: kubectl create namespace datagrok
       - name: deploy grok connect
         if: steps.chart_changes.outputs.grok_connect == 'true'
         working-directory: ./base/datagrok_grok_connect
         run: |
           helm install grok-connect-test . -f values.yaml -n datagrok --dry-run
-#          helm install grok-connect-test . -f values.yaml -n datagrok
       - name: deploy grok spawner
         if: steps.chart_changes.outputs.grok_spawner == 'true'
         working-directory: ./base/datagrok_grok_spawner
         run: |
           helm install grok-connect-test . -f values.yaml -n datagrok --dry-run
-      #          helm install grok-connect-test . -f values.yaml -n datagrok
       - name: deploy jupyter notebook
         if: steps.chart_changes.outputs.jn == 'true'
         working-directory: ./base/datagrok_jupyter_notebook
         run: |
           helm install jupyter-notebook-test . -f values.yaml -n datagrok --dry-run
-#          helm install jupyter-notebook-test . -f values.yaml -n datagrok
       - name: deploy jkg
         if: steps.chart_changes.outputs.jkg == 'true'
         working-directory: ./base/datagrok_jkg
         run: |
           helm install jkg-test . -f values.yaml -n datagrok --dry-run
-#          helm install jkg-test . -f values.yaml -n datagrok
-#
-#          helm install datagrok-test . -f values.yaml -n datagrok --dry-run
-#          helm install datagrok-test . -f values.yaml -n datagrok
-
-#      - name: check running state
-#        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
-#        run: |
-#          check_any_pod_not_running() {
-#            local namespace=$1
-#            while read -r pod status; do
-#                if [[ "$status" != "Running" ]]; then
-#                    return 0
-#                fi
-#            done < <(kubectl get pods -n datagrok --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.phase}{"\n"}{end}')
-#            return 1
-#          }
-#          start_time_running_state=$(date +%s)
-#          timeout_running_state=600
-#          while check_any_pod_not_running datagrok; do
-#            current_time=$(date +%s)
-#            elapsed_time=$((current_time - start_time_running_state))
-#            if (( elapsed_time >= timeout_running_state )); then
-#                echo "Timeout reached. Not all pods are running."
-#                exit 1
-#            fi
-#            echo "Not all pods are running. Waiting..."
-#            echo "____________________________________"
-#            kubectl get pods -n datagrok
-#            sleep 10  # Adjust the delay as needed
-#          done
-#          echo "  _ _ _ _ _ _ _ _ _ _ _ _ "
-#          echo " |                       |"
-#          echo " | All pods are running  |"
-#          echo " |_ _ _ _ _ _ _ _ _ _ _ _|"
-#          kubectl get pods -n datagrok
-#      - name: Check ready state
-#        if: steps.chart_changes.outputs.jkg == 'true' || steps.chart_changes.outputs.jn == 'true' || steps.chart_changes.outputs.h2o == 'true' || steps.chart_changes.outputs.grok_connect == 'true'
-#        run: |
-#          check_any_pod_not_ready() {
-#              local namespace=$1
-#              while read -r pod ready; do
-#                  if [[ "$ready" != "True" ]]; then
-#                      return 0
-#                  fi
-#              done < <(kubectl get pods -n datagrok --output=jsonpath='{range .items[*]}{.metadata.name}{" "}{range .status.conditions[?(@.type=="Ready")]}{.status}{"\n"}{end}')
-#              return 1
-#          }
-#          start_time_ready_state=$(date +%s)
-#          timeout_ready_state=120
-#
-#          while check_any_pod_not_ready datagrok; do
-#            current_time=$(date +%s)
-#            elapsed_time=$((current_time - start_time_ready_state))
-#            if (( elapsed_time >= timeout_ready_state )); then
-#                echo "Timeout reached. Not all pods are ready."
-#                exit 1
-#            fi
-#                echo "Not all pods are ready. Waiting..."
-#                echo "__________________________________"
-#                kubectl get pods -n datagrok
-#                sleep 30  # Adjust the delay as needed
-#          done
-#          echo "  _ _ _ _ _ _ _ _ _ _ _ "
-#          echo " |                     |"
-#          echo " | All pods are ready  |"
-#          echo " |_ _ _ _ _ _ _ _ _ _ _|"
-#          kubectl get pods -n datagrok
-
       - name: Configure Git
         run: |
           git config user.name "GitHub Actions"
@@ -168,8 +96,6 @@ jobs:
         if: steps.chart_changes.outputs.grok_spawner_publish == 'true'
         run: |
           helm package ./base/datagrok_grok_spawner -d charts/
-          
-          ls charts
       - name: Publish jkg status
         if: steps.chart_changes.outputs.jkg_publish == 'true'
         run: |
@@ -178,8 +104,6 @@ jobs:
         if: steps.chart_changes.outputs.jn_publish == 'true'
         run: |
           helm package ./base/datagrok_jupyter_notebook -d charts/
-          #helm push
-          ls charts
       - name: Publish
         if: steps.chart_changes.outputs.jkg_publish == 'true' || steps.chart_changes.outputs.jn_publish == 'true' || steps.chart_changes.outputs.grok_connect_publish == 'true' || steps.chart_changes.outputs.grok_spawner_publish == 'true'
         run: |
